@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.pisco.stockmanager.presentation.screen.ClientScreen
 import com.pisco.stockmanager.presentation.screen.DashboardScreen
 import com.pisco.stockmanager.presentation.screen.ProductScreen
+import com.pisco.stockmanager.presentation.screen.Sale2Screen
 import com.pisco.stockmanager.presentation.screen.SaleScreen
 
 @Composable
@@ -40,7 +41,7 @@ fun AppNavGraph(
         composable(
             Screen.Sales.route
         ) {
-            SaleScreen()
+            Sale2Screen()
         }
     }
 }
