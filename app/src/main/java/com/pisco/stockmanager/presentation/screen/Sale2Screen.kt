@@ -22,7 +22,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -31,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,76 +88,87 @@ fun Sale2Screen(
         mutableStateOf("")
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Caisse")
+                },
+                expandedHeight = 26.dp,
+                colors = TopAppBarDefaults.topAppBarColors(
 
-        Text(
-            text = "Caisse",
-            style = MaterialTheme.typography.headlineSmall
-        )
+                    containerColor = Color(0xFF4CAF50), // Vert
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+                    titleContentColor = Color.White
+                )
+            )
+        }
+    ) { padding ->
 
-        Row(
-            modifier = Modifier.weight(1f)
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
         ) {
+            // contenu
 
-            ProductPanel(
-                modifier = Modifier.weight(1f),
-                products = products,
-                onAddProduct = { product ->
 
-                    selectedProduct = product
-
-                    showDialog = true
-                }
-            )
-
-            Spacer(
-                modifier = Modifier.width(8.dp)
-            )
-
-            Column(
+            Row(
                 modifier = Modifier.weight(1f)
             ) {
 
-                Box(
-                    modifier = Modifier.weight(2f)
-                ) {
-                    CartPanel(
-                        modifier = Modifier.fillMaxSize(),
-                        cart = cart
-                    )
-                }
+                ProductPanel(
+                    modifier = Modifier.weight(1f),
+                    products = products,
+                    onAddProduct = { product ->
 
-                Box(
+                        selectedProduct = product
+
+                        showDialog = true
+                    }
+                )
+
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+
+                Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    PaymentPanel(
-                        modifier = Modifier.fillMaxSize(),
-                        total = total,
-                        paymentMode = paymentMode,
-                        onCashClick = {
-                            viewModel.setPaymentMode("CASH")
-                        },
-                        onCreditClick = {
-                            viewModel.setPaymentMode("CREDIT")
-                        },
-                        onValidate = {
-                            selectedClient?.let {
-                                viewModel.validateSale(it.id)
+
+                    Box(
+                        modifier = Modifier.weight(2f)
+                    ) {
+                        CartPanel(
+                            modifier = Modifier.fillMaxSize(),
+                            cart = cart
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        PaymentPanel(
+                            modifier = Modifier.fillMaxSize(),
+                            total = total,
+                            paymentMode = paymentMode,
+                            onCashClick = {
+                                viewModel.setPaymentMode("CASH")
+                            },
+                            onCreditClick = {
+                                viewModel.setPaymentMode("CREDIT")
+                            },
+                            onValidate = {
+                                selectedClient?.let {
+                                    viewModel.validateSale(it.id)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
-            }
         }
+    }
 
 
     if (showDialog) {
@@ -377,3 +392,4 @@ fun ProductPanel(
         }
     }
 }
+
