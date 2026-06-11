@@ -3,6 +3,7 @@ package com.pisco.stockmanager.presentation.screen
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,9 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -93,7 +92,7 @@ fun Sale2Screen(
 
         Text(
             text = "Caisse",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineSmall
         )
 
         Spacer(
@@ -119,36 +118,105 @@ fun Sale2Screen(
                 modifier = Modifier.width(8.dp)
             )
 
-            CartPanel(
-                modifier = Modifier.weight(1f),
-                cart = cart
-            )
-        }
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
 
-        PaymentPanel(  total = total,
-            paymentMode = paymentMode,
-
-            onCashClick = {
-                viewModel.setPaymentMode("CASH")
-            },
-
-            onCreditClick = {
-                viewModel.setPaymentMode("CREDIT")
-            },
-
-            onValidate = {
-
-                selectedClient?.let {
-
-                    viewModel.validateSale(
-                        it.id
+                Box(
+                    modifier = Modifier.weight(2f)
+                ) {
+                    CartPanel(
+                        modifier = Modifier.fillMaxSize(),
+                        cart = cart
                     )
                 }
-            })
+
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    PaymentPanel(
+                        modifier = Modifier.fillMaxSize(),
+                        total = total,
+                        paymentMode = paymentMode,
+                        onCashClick = {
+                            viewModel.setPaymentMode("CASH")
+                        },
+                        onCreditClick = {
+                            viewModel.setPaymentMode("CREDIT")
+                        },
+                        onValidate = {
+                            selectedClient?.let {
+                                viewModel.validateSale(it.id)
+                            }
+                        }
+                    )
+                }
+            }
+            }
+        }
+
+
+    if (showDialog) {
+
+        AlertDialog(
+
+            onDismissRequest = {
+                showDialog = false
+            },
+
+            title = {
+                Text("Quantité")
+            },
+
+            text = {
+
+                OutlinedTextField(
+                    value = quantity,
+                    onValueChange = {
+                        quantity = it
+                    }
+                )
+            },
+
+            confirmButton = {
+
+                Button(
+                    onClick = {
+
+                        selectedProduct?.let {
+
+                            viewModel.addToCart(
+                                it,
+                                quantity.toIntOrNull() ?: 1
+                            )
+                        }
+
+                        quantity = ""
+
+                        showDialog = false
+                    }
+                ) {
+
+                    Text("Ajouter")
+                }
+            },
+
+            dismissButton = {
+
+                Button(
+                    onClick = {
+                        showDialog = false
+                    }
+                ) {
+
+                    Text("Annuler")
+                }
+            }
+        )
     }
-
-
 }
+
+
 
 @Composable
 fun PaymentPanel(
@@ -156,18 +224,21 @@ fun PaymentPanel(
     paymentMode: String,
     onCashClick: () -> Unit,
     onCreditClick: () -> Unit,
-    onValidate: () -> Unit
+    onValidate: () -> Unit,
+    modifier: Modifier
 ) {
 
     Card {
-
+        var modifier = Modifier.fillMaxWidth()
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
         ) {
 
             Text(
                 "Total : $total CFA",
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.titleMedium
             )
 
             Row {
@@ -187,15 +258,17 @@ fun PaymentPanel(
                 )
 
                 Text("Crédit")
+
+                Button(
+                    modifier = Modifier.fillMaxSize(),
+                    onClick = onValidate
+                ) {
+
+                    Text("Valider Facture")
+                }
             }
 
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onValidate
-            ) {
 
-                Text("Valider Facture")
-            }
         }
     }
 }
@@ -262,7 +335,7 @@ fun ProductPanel(
 
             Text(
                 "Produits",
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleMedium
             )
 
             LazyColumn {
