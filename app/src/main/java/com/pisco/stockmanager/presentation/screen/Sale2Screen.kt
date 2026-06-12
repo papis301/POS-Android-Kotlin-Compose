@@ -1,5 +1,6 @@
 package com.pisco.stockmanager.presentation.screen
 
+import android.R.attr.padding
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.widget.Toast
@@ -7,8 +8,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -113,36 +117,47 @@ fun Sale2Screen(
 
     val listState = rememberLazyListState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
 
-                title = {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 32.dp, end = 36.dp)
+    ) {
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement =
-                            Arrangement.SpaceBetween
-                    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(2.dp)
+        ) {
 
-                        Text("Caisse")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(2.dp, end = 4.dp),
+                horizontalArrangement =
+                    Arrangement.spacedBy(2.dp)
+            ) {
 
-                        OutlinedTextField(
-                            value = search,
-                            onValueChange = {
-                                search = it
-                            },
-                            modifier = Modifier.width(250.dp),
-                            singleLine = true,
-                            label = {
-                                Text("Recherche")
-                            }
-                        )
+                Text(
+                    "Caisse",
+                    style =
+                        MaterialTheme.typography.titleLarge
+                )
+
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = {
+                        search = it
+                    },
+                    modifier = Modifier.width(250.dp).height(56.dp),
+                    singleLine = true,
+                    label = {
+                        Text("Rechercher un produit")
                     }
-                },
-
-                actions = {
-
+                )
+                Spacer(
+                    modifier = Modifier.weight(1f)
+                )
                     Button(
                         onClick = {
                             expanded = true
@@ -194,17 +209,6 @@ fun Sale2Screen(
                             }
                         )
 
-//                        DropdownMenuItem(
-//                            text = {
-//                                Text("Caisse")
-//                            },
-//                            onClick = {
-//                                expanded = false
-//                                navController.navigate(
-//                                    "sales"
-//                                )
-//                            }
-//                        )
 
                         DropdownMenuItem(
                             text = {
@@ -218,15 +222,12 @@ fun Sale2Screen(
                             }
                         )
                     }
-                }
-            )
-        }
-    ) { padding ->
 
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
+            }
+        }
+
+        Row(
+            modifier = Modifier.weight(1f)
         ) {
             // contenu
 
@@ -324,7 +325,6 @@ fun Sale2Screen(
             }
         }
     }
-
 
     if (showDialog) {
 
@@ -592,7 +592,7 @@ fun ProductPanel(
 //            Spacer(
 //                modifier = Modifier.height(8.dp)
 //            )
-            
+
 
             Spacer(
                 modifier = Modifier.height(8.dp)
@@ -640,4 +640,7 @@ fun ProductPanel(
         }
     }
 }
+
+
+
 
