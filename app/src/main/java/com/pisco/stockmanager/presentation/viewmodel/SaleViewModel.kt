@@ -278,4 +278,54 @@ class SaleViewModel @Inject constructor(
         }
     }
 
+    fun increaseQuantity(
+        productId: Int
+    ) {
+
+        _cart.value =
+            _cart.value.map { item ->
+
+                if (item.product.id == productId) {
+
+                    item.copy(
+                        quantity = item.quantity + 1
+                    )
+
+                } else {
+
+                    item
+                }
+            }
+    }
+
+    fun decreaseQuantity(
+        productId: Int
+    ) {
+
+        _cart.value =
+            _cart.value.mapNotNull { item ->
+
+                if (item.product.id == productId) {
+
+                    val newQuantity =
+                        item.quantity - 1
+
+                    if (newQuantity <= 0) {
+
+                        null
+
+                    } else {
+
+                        item.copy(
+                            quantity = newQuantity
+                        )
+                    }
+
+                } else {
+
+                    item
+                }
+            }
+    }
+
 }

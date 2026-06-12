@@ -2,6 +2,8 @@ package com.pisco.stockmanager.presentation.screen
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,10 +17,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -36,19 +43,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.pisco.stockmanager.data.local.ClientEntity
 import com.pisco.stockmanager.data.local.ProductEntity
 import com.pisco.stockmanager.domain.model.CartItem
 import com.pisco.stockmanager.presentation.viewmodel.SaleViewModel
+import com.pisco.stockmanager.utils.formatCfa
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Sale2Screen(
+    navController: NavController,
     viewModel: SaleViewModel = hiltViewModel()
 ){
 
+    var search by remember {
+        mutableStateOf("")
+    }
     val context = LocalContext.current
     val activity = context as Activity
 
@@ -88,19 +102,123 @@ fun Sale2Screen(
         mutableStateOf("")
     }
 
+    val filteredProducts =
+        products.filter {
+
+            it.name.contains(
+                search,
+                ignoreCase = true
+            )
+        }
+
+    val listState = rememberLazyListState()
+
     Scaffold(
         topBar = {
             TopAppBar(
+
                 title = {
-                    Text("Caisse")
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement =
+                            Arrangement.SpaceBetween
+                    ) {
+
+                        Text("Caisse")
+
+                        OutlinedTextField(
+                            value = search,
+                            onValueChange = {
+                                search = it
+                            },
+                            modifier = Modifier.width(250.dp),
+                            singleLine = true,
+                            label = {
+                                Text("Recherche")
+                            }
+                        )
+                    }
                 },
-                expandedHeight = 26.dp,
-                colors = TopAppBarDefaults.topAppBarColors(
 
-                    containerColor = Color(0xFF4CAF50), // Vert
+                actions = {
 
-                    titleContentColor = Color.White
-                )
+                    Button(
+                        onClick = {
+                            expanded = true
+                        }
+                    ) {
+                        Text("Menu")
+                    }
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = {
+                            expanded = false
+                        }
+                    ) {
+
+                        DropdownMenuItem(
+                            text = {
+                                Text("Dashboard")
+                            },
+                            onClick = {
+                                expanded = false
+                                navController.navigate(
+                                    "dashboard"
+                                )
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = {
+                                Text("Produits")
+                            },
+                            onClick = {
+                                expanded = false
+                                navController.navigate(
+                                    "products"
+                                )
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = {
+                                Text("Clients")
+                            },
+                            onClick = {
+                                expanded = false
+                                navController.navigate(
+                                    "clients"
+                                )
+                            }
+                        )
+
+//                        DropdownMenuItem(
+//                            text = {
+//                                Text("Caisse")
+//                            },
+//                            onClick = {
+//                                expanded = false
+//                                navController.navigate(
+//                                    "sales"
+//                                )
+//                            }
+//                        )
+
+                        DropdownMenuItem(
+                            text = {
+                                Text("Historique")
+                            },
+                            onClick = {
+                                expanded = false
+                                navController.navigate(
+                                    "history"
+                                )
+                            }
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -119,7 +237,7 @@ fun Sale2Screen(
 
                 ProductPanel(
                     modifier = Modifier.weight(1f),
-                    products = products,
+                    products = filteredProducts,
                     onAddProduct = { product ->
 
                         selectedProduct = product
@@ -141,7 +259,28 @@ fun Sale2Screen(
                     ) {
                         CartPanel(
                             modifier = Modifier.fillMaxSize(),
-                            cart = cart
+                            cart = cart,
+
+                            onIncrease = { productId ->
+
+                                viewModel.increaseQuantity(
+                                    productId
+                                )
+                            },
+
+                            onDecrease = { productId ->
+
+                                viewModel.decreaseQuantity(
+                                    productId
+                                )
+                            },
+
+                            onRemoveItem = { productId ->
+
+                                viewModel.removeFromCart(
+                                    productId
+                                )
+                            }
                         )
                     }
 
@@ -151,17 +290,33 @@ fun Sale2Screen(
                         PaymentPanel(
                             modifier = Modifier.fillMaxSize(),
                             total = total,
-                            paymentMode = paymentMode,
-                            onCashClick = {
-                                viewModel.setPaymentMode("CASH")
-                            },
-                            onCreditClick = {
-                                viewModel.setPaymentMode("CREDIT")
-                            },
+
                             onValidate = {
-                                selectedClient?.let {
-                                    viewModel.validateSale(it.id)
+
+                                if (cart.isEmpty()) {
+
+                                    Toast.makeText(
+                                        context,
+                                        "Le panier est vide",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+
+                                    return@PaymentPanel
                                 }
+
+                                val clientId =
+                                    selectedClient?.id ?: 1
+
+                                viewModel.validateSale(
+                                    clientId
+
+                                )
+
+                                Toast.makeText(
+                                    context,
+                                    "Vente enregistrée avec succès",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         )
                     }
@@ -188,8 +343,19 @@ fun Sale2Screen(
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = {
-                        quantity = it
-                    }
+
+                        if (it.all { char -> char.isDigit() }) {
+                            quantity = it
+                        }
+                    },
+
+                    label = {
+                        Text("Quantité")
+                    },
+
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    )
                 )
             },
 
@@ -198,19 +364,31 @@ fun Sale2Screen(
                 Button(
                     onClick = {
 
-                        selectedProduct?.let {
+                        val qty = quantity.toIntOrNull()
+
+                        if (
+                            qty != null &&
+                            selectedProduct != null &&
+                            qty <= selectedProduct!!.quantity
+                        ) {
 
                             viewModel.addToCart(
-                                it,
-                                quantity.toIntOrNull() ?: 1
+                                selectedProduct!!,
+                                qty
                             )
+
+                            showDialog = false
+
+                        } else {
+
+                            Toast.makeText(
+                                context,
+                                "Stock insuffisant ou quantité invalide",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-
-                        quantity = ""
-
-                        showDialog = false
                     }
-                ) {
+                ){
 
                     Text("Ajouter")
                 }
@@ -236,54 +414,30 @@ fun Sale2Screen(
 @Composable
 fun PaymentPanel(
     total: Double,
-    paymentMode: String,
-    onCashClick: () -> Unit,
-    onCreditClick: () -> Unit,
     onValidate: () -> Unit,
     modifier: Modifier
 ) {
 
-    Card {
-        var modifier = Modifier.fillMaxWidth()
+    Card(
+        modifier = modifier
+    ) {
+
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.Center
         ) {
 
-            Text(
-                "Total : $total CFA",
-                style = MaterialTheme.typography.titleMedium
-            )
 
-            Row {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onValidate
+            ) {
 
-                RadioButton(
-                    selected =
-                        paymentMode == "CASH",
-                    onClick = onCashClick
-                )
-
-                Text("Cash")
-
-                RadioButton(
-                    selected =
-                        paymentMode == "CREDIT",
-                    onClick = onCreditClick
-                )
-
-                Text("Crédit")
-
-                Button(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = onValidate
-                ) {
-
-                    Text("Valider Facture")
-                }
+                Text("Total : ${formatCfa(total)} CFA\n"+
+                        "Valider Facture")
             }
-
-
         }
     }
 }
@@ -291,7 +445,10 @@ fun PaymentPanel(
 @Composable
 fun CartPanel(
     modifier: Modifier = Modifier,
-    cart: List<CartItem>
+    cart: List<CartItem>,
+    onRemoveItem: (Int) -> Unit,
+    onIncrease: (Int) -> Unit,
+    onDecrease: (Int) -> Unit,
 ) {
 
     Card(
@@ -299,36 +456,114 @@ fun CartPanel(
     ) {
 
         Column(
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp)
         ) {
 
             Text(
-                "Panier",
-                style = MaterialTheme.typography.titleLarge
+                text = "Panier",
+                style = MaterialTheme.typography.titleMedium
             )
 
-            LazyColumn {
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            LazyColumn(
+                modifier = Modifier.weight(1f)
+            ) {
 
                 items(cart) { item ->
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
+                            .padding(vertical = 4.dp),
                         horizontalArrangement =
                             Arrangement.SpaceBetween
                     ) {
 
-                        Text(
-                            "${item.product.name} x${item.quantity}"
-                        )
+                        Column {
 
-                        Text(
-                            "${item.product.price * item.quantity}"
-                        )
+                            Text(
+                                item.product.name
+                            )
+
+                        }
+
+                        Row {
+
+                            Column {
+
+
+                                Row {
+
+                                    Button(
+                                        onClick = {
+
+                                            onDecrease(
+                                                item.product.id
+                                            )
+                                        }
+                                    ) {
+                                        Text("-")
+                                    }
+
+                                    Text(
+                                        item.quantity.toString(),
+                                        modifier =
+                                            Modifier.padding(8.dp)
+                                    )
+
+                                    Button(
+                                        onClick = {
+
+                                            onIncrease(
+                                                item.product.id
+                                            )
+                                        }
+                                    ) {
+                                        Text("+")
+                                    }
+                                }
+                            }
+
+                            Spacer(
+                                modifier = Modifier.width(8.dp)
+                            )
+
+                            Button(
+                                onClick = {
+                                    onRemoveItem(
+                                        item.product.id
+                                    )
+                                }
+                            ) {
+                                Text("❌")
+                            }
+                        }
                     }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
                 }
             }
+
+//            Spacer(
+//                modifier = Modifier.height(8.dp)
+//            )
+//
+//            Text(
+//                text =
+//                    "Articles : ${
+//                        cart.sumOf { it.quantity }
+//                    }",
+//                style =
+//                    MaterialTheme.typography.titleMedium
+//            )
+
+
         }
     }
 }
@@ -339,7 +574,9 @@ fun ProductPanel(
     products: List<ProductEntity>,
     onAddProduct: (ProductEntity) -> Unit
 ) {
-
+    var search by remember {
+        mutableStateOf("")
+    }
     Card(
         modifier = modifier.fillMaxHeight()
     ) {
@@ -348,9 +585,17 @@ fun ProductPanel(
             modifier = Modifier.padding(12.dp)
         ) {
 
-            Text(
-                "Produits",
-                style = MaterialTheme.typography.titleMedium
+//            Text(
+//                "Produits",
+//                style = MaterialTheme.typography.titleMedium
+//            )
+//            Spacer(
+//                modifier = Modifier.height(8.dp)
+//            )
+            
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
             )
 
             LazyColumn {
@@ -387,6 +632,9 @@ fun ProductPanel(
                             Text("Ajouter")
                         }
                     }
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
                 }
             }
         }
