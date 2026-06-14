@@ -39,6 +39,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +70,21 @@ fun Sale2Screen(
     }
     val context = LocalContext.current
     val activity = context as Activity
+
+    val message by viewModel.message.collectAsState()
+    LaunchedEffect(message) {
+
+        message?.let {
+
+            Toast.makeText(
+                context,
+                it,
+                Toast.LENGTH_SHORT
+            ).show()
+
+            viewModel.clearMessage()
+        }
+    }
 
     DisposableEffect(Unit) {
 

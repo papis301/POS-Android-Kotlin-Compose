@@ -33,6 +33,12 @@ class SaleViewModel @Inject constructor(
     private val _sales =
         MutableStateFlow<List<SaleEntity>>(emptyList())
 
+    private val _message =
+        MutableStateFlow<String?>(null)
+
+    val message =
+        _message.asStateFlow()
+
     val sales: StateFlow<List<SaleEntity>>
             = _sales.asStateFlow()
 
@@ -69,6 +75,11 @@ class SaleViewModel @Inject constructor(
 
     val cart =
         _cart.asStateFlow()
+
+    fun clearMessage() {
+
+        _message.value = null
+    }
 
     private fun loadClients() {
 
@@ -287,9 +298,21 @@ class SaleViewModel @Inject constructor(
 
                 if (item.product.id == productId) {
 
-                    item.copy(
-                        quantity = item.quantity + 1
-                    )
+                    if (
+                        item.quantity <
+                        item.product.quantity
+                    ) {
+
+                        item.copy(
+                            quantity =
+                                item.quantity + 1
+                        )
+
+                    } else {
+                        _message.value =
+                            "Stock maximum atteint"
+                        item
+                    }
 
                 } else {
 
