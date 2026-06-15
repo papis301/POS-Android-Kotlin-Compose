@@ -7,10 +7,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.pisco.stockmanager.presentation.screen.CartScreen
 import com.pisco.stockmanager.presentation.screen.ClientScreen
 import com.pisco.stockmanager.presentation.screen.DashboardScreen
 import com.pisco.stockmanager.presentation.screen.ProductScreen
-import com.pisco.stockmanager.presentation.screen.Sale2Screen
 import com.pisco.stockmanager.presentation.screen.SaleDetailScreen
 import com.pisco.stockmanager.presentation.screen.SaleHistoryScreen
 import com.pisco.stockmanager.presentation.screen.SaleScreen
@@ -47,7 +47,7 @@ fun AppNavGraph(
         composable(
             Screen.Sales.route
         ) {
-            Sale2Screen(navController)
+            SaleScreen(navController)
         }
 
         composable(
@@ -55,6 +55,13 @@ fun AppNavGraph(
         ) {
 
             SaleHistoryScreen(navController = navController)
+        }
+
+        composable("cart") {
+
+            CartScreen(
+                navController = navController
+            )
         }
 
         composable(

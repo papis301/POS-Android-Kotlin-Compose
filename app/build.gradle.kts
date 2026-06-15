@@ -72,4 +72,5 @@ dependencies {
     ksp("androidx.room:room-compiler:2.7.0")
     implementation("com.google.dagger:hilt-android:2.56")
     implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation("androidx.compose.material:material-icons-extended")
 }

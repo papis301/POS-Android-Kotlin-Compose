@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pisco.stockmanager.data.local.ProductEntity
 import com.pisco.stockmanager.presentation.viewmodel.ProductViewModel
 
 @Composable
@@ -21,6 +22,17 @@ fun ProductScreen(
     val products by viewModel.products.collectAsState()
 
     var name by remember {
+        mutableStateOf("")
+    }
+    var showRestockDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var selectedProduct by remember {
+        mutableStateOf<ProductEntity?>(null)
+    }
+
+    var restockQty by remember {
         mutableStateOf("")
     }
 
@@ -86,6 +98,16 @@ fun ProductScreen(
                 )
                 Button(
                     onClick = {
+
+                        selectedProduct = product
+
+                        showRestockDialog = true
+                    }
+                ) {
+                    Text("Stock +")
+                }
+                Button(
+                    onClick = {
                         viewModel.deleteProduct(product)
                     }
                 ) {
@@ -93,5 +115,67 @@ fun ProductScreen(
                 }
             }
         }
+    }
+
+    if (showRestockDialog) {
+
+        AlertDialog(
+
+            onDismissRequest = {
+                showRestockDialog = false
+            },
+
+            title = {
+                Text("Réapprovisionnement")
+            },
+
+            text = {
+
+                Column {
+
+                    Text(
+                        selectedProduct?.name ?: ""
+                    )
+
+                    OutlinedTextField(
+                        value = restockQty,
+                        onValueChange = {
+                            restockQty = it.filter {
+                                    c -> c.isDigit()
+                            }
+                        },
+                        label = {
+                            Text("Quantité")
+                        }
+                    )
+                }
+            },
+
+            confirmButton = {
+
+                Button(
+                    onClick = {
+
+                        val qty =
+                            restockQty.toIntOrNull() ?: 0
+
+                        selectedProduct?.let {
+
+                            viewModel.restockProduct(
+                                it,
+                                qty
+                            )
+                        }
+
+                        restockQty = ""
+
+                        showRestockDialog = false
+                    }
+                ) {
+
+                    Text("Valider")
+                }
+            }
+        )
     }
 }

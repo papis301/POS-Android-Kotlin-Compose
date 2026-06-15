@@ -1,5 +1,6 @@
 package com.pisco.stockmanager.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pisco.stockmanager.data.local.ClientEntity
@@ -30,6 +31,9 @@ class SaleViewModel @Inject constructor(
 
 ) : ViewModel() {
 
+    init {
+        Log.d("SALE_VM", "ViewModel créé : $this")
+    }
     private val _sales =
         MutableStateFlow<List<SaleEntity>>(emptyList())
 
@@ -141,6 +145,15 @@ class SaleViewModel @Inject constructor(
             }
     }
 
+//    fun removeFromCartPortrait(productId: Int) {
+//
+//        _cart.value =
+//            _cart.value.filter {
+//                it.product.id != productId
+//            }
+//
+//        calculateTotal()
+//    }
     val total: StateFlow<Double> =
         _cart
             .map { cartItems ->

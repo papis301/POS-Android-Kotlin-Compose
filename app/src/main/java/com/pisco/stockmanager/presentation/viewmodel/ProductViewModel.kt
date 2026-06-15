@@ -12,7 +12,7 @@ import javax.inject.Inject
 //Le ViewModel gère la logique de l'écran. les fonctionnalites
 @HiltViewModel
 class ProductViewModel @Inject constructor(
-    private val repository: ProductRepository
+    private val productRepository: ProductRepository
 ) : ViewModel() {
 
     private val _products =
@@ -29,7 +29,7 @@ class ProductViewModel @Inject constructor(
 
         viewModelScope.launch {
 
-            repository.getProducts()
+            productRepository.getProducts()
                 .collect {
 
                     _products.value = it
@@ -42,7 +42,7 @@ class ProductViewModel @Inject constructor(
     ) {
 
         viewModelScope.launch {
-            repository.deleteProduct(product)
+            productRepository.deleteProduct(product)
         }
     }
 
@@ -51,7 +51,7 @@ class ProductViewModel @Inject constructor(
     ) {
 
         viewModelScope.launch {
-            repository.updateProduct(product)
+            productRepository.updateProduct(product)
         }
     }
 
@@ -62,13 +62,33 @@ class ProductViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
 
-            repository.insertProduct(
+            productRepository.insertProduct(
                 ProductEntity(
                     name = name,
                     description = "",
                     price = price,
                     quantity = quantity,
                     createdAt = System.currentTimeMillis()
+                )
+            )
+        }
+    }
+
+    fun restockProduct(
+        product: ProductEntity,
+        quantity: Int
+    ) {
+
+        if (quantity <= 0) return
+
+        viewModelScope.launch {
+
+            productRepository.updateProduct(
+
+                product.copy(
+
+                    quantity =
+                        product.quantity + quantity
                 )
             )
         }
