@@ -35,7 +35,8 @@ fun AppNavGraph(
         composable(
             Screen.Products.route
         ) {
-            ProductScreen()
+            ProductScreen(
+            )
         }
 
         composable(

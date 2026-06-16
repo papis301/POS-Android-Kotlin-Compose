@@ -1,181 +1,34 @@
 package com.pisco.stockmanager.presentation.screen
 
-import android.app.Activity
-import android.content.pm.ActivityInfo
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pisco.stockmanager.data.local.ProductEntity
+import androidx.navigation.NavController
 import com.pisco.stockmanager.presentation.viewmodel.ProductViewModel
+import com.pisco.stockmanager.presentation.viewmodel.SaleViewModel
 
 @Composable
-fun ProductScreen(
-    viewModel: ProductViewModel = hiltViewModel()
-) {
+fun ProductScreen()
+{
 
-    val products by viewModel.products.collectAsState()
 
-    var name by remember {
-        mutableStateOf("")
-    }
-    var showRestockDialog by remember {
-        mutableStateOf(false)
-    }
+    val configuration =
+        LocalConfiguration.current
 
-    var selectedProduct by remember {
-        mutableStateOf<ProductEntity?>(null)
-    }
+    val isTablet =
+        configuration.screenWidthDp >= 600
 
-    var restockQty by remember {
-        mutableStateOf("")
-    }
+    if (isTablet) {
 
-    val context = LocalContext.current
-    val activity = context as Activity
-    DisposableEffect(Unit) {
-
-        activity.requestedOrientation =
-            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-
-        onDispose {
-
-            activity.requestedOrientation =
-                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        }
-    }
-
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
-
-        OutlinedTextField(
-            value = name,
-            onValueChange = {
-                name = it
-            },
-            label = {
-                Text("Nom produit")
-            }
+        ProductLandscapeScreen(
         )
 
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
+    } else {
 
-        Button(
-            onClick = {
+        ProductPortraitScreen(
 
-                viewModel.addProduct(
-                    name,
-                    1000.0,
-                    1
-                )
-
-                name = ""
-            }
-        ) {
-
-            Text("Ajouter")
-        }
-
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
-
-        LazyColumn {
-
-            items(products) { product ->
-
-                Text(
-                    text = product.name,
-                    modifier = Modifier.weight(1f)
-                )
-                Button(
-                    onClick = {
-
-                        selectedProduct = product
-
-                        showRestockDialog = true
-                    }
-                ) {
-                    Text("Stock +")
-                }
-                Button(
-                    onClick = {
-                        viewModel.deleteProduct(product)
-                    }
-                ) {
-                    Text("Supprimer")
-                }
-            }
-        }
-    }
-
-    if (showRestockDialog) {
-
-        AlertDialog(
-
-            onDismissRequest = {
-                showRestockDialog = false
-            },
-
-            title = {
-                Text("Réapprovisionnement")
-            },
-
-            text = {
-
-                Column {
-
-                    Text(
-                        selectedProduct?.name ?: ""
-                    )
-
-                    OutlinedTextField(
-                        value = restockQty,
-                        onValueChange = {
-                            restockQty = it.filter {
-                                    c -> c.isDigit()
-                            }
-                        },
-                        label = {
-                            Text("Quantité")
-                        }
-                    )
-                }
-            },
-
-            confirmButton = {
-
-                Button(
-                    onClick = {
-
-                        val qty =
-                            restockQty.toIntOrNull() ?: 0
-
-                        selectedProduct?.let {
-
-                            viewModel.restockProduct(
-                                it,
-                                qty
-                            )
-                        }
-
-                        restockQty = ""
-
-                        showRestockDialog = false
-                    }
-                ) {
-
-                    Text("Valider")
-                }
-            }
         )
     }
 }

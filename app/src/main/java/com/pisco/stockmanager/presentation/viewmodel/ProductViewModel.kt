@@ -51,24 +51,39 @@ class ProductViewModel @Inject constructor(
     ) {
 
         viewModelScope.launch {
-            productRepository.updateProduct(product)
+
+            productRepository.updateProduct(
+                product
+            )
         }
     }
 
     fun addProduct(
         name: String,
+        description: String,
+        purchasePrice: Double,
         price: Double,
-        quantity: Int
+        quantity: Int,
+        category: String
     ) {
+
         viewModelScope.launch {
 
             productRepository.insertProduct(
+
                 ProductEntity(
+
                     name = name,
-                    description = "",
+
+                    description = description,
+
+                    purchasePrice = purchasePrice,
+
                     price = price,
+
                     quantity = quantity,
-                    createdAt = System.currentTimeMillis()
+
+                    category = category
                 )
             )
         }

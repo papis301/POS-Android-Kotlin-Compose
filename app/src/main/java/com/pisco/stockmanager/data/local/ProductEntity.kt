@@ -11,11 +11,16 @@ data class ProductEntity(
 
     val name: String,
 
-    val description: String,
+    val description: String = "",
+
+    val purchasePrice: Double = 0.0,
 
     val price: Double,
 
     val quantity: Int,
 
-    val createdAt: Long = System.currentTimeMillis()
+    val category: String = "",
+
+    val createdAt: Long =
+        System.currentTimeMillis()
 )
