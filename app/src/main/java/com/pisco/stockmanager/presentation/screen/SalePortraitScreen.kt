@@ -1,13 +1,21 @@
 package com.pisco.stockmanager.presentation.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -110,24 +121,38 @@ fun SalePortraitScreen(
 
             ) {
 
+//                DropdownMenuItem(
+//
+//                    leadingIcon = {
+//
+//                        Icon(
+//                            Icons.Default.Dashboard,
+//                            contentDescription = null
+//                        )
+//                    },
+//                    text = {
+//                        Text("Dashboard")
+//                    },
+//
+//                    onClick = {
+//
+//                        expanded = false
+//
+//                        navController.navigate(
+//                            "dashboard"
+//                        )
+//                    }
+//                )
+
                 DropdownMenuItem(
 
-                    text = {
-                        Text("Dashboard")
-                    },
+                    leadingIcon = {
 
-                    onClick = {
-
-                        expanded = false
-
-                        navController.navigate(
-                            "dashboard"
+                        Icon(
+                            Icons.Default.Inventory2,
+                            contentDescription = null
                         )
-                    }
-                )
-
-                DropdownMenuItem(
-
+                    },
                     text = {
                         Text("Produits")
                     },
@@ -142,24 +167,38 @@ fun SalePortraitScreen(
                     }
                 )
 
+//                DropdownMenuItem(
+//
+//                    leadingIcon = {
+//
+//                        Icon(
+//                            Icons.Default.People,
+//                            contentDescription = null
+//                        )
+//                    },
+//                    text = {
+//                        Text("Clients")
+//                    },
+//
+//                    onClick = {
+//
+//                        expanded = false
+//
+//                        navController.navigate(
+//                            "clients"
+//                        )
+//                    }
+//                )
+
                 DropdownMenuItem(
 
-                    text = {
-                        Text("Clients")
-                    },
+                    leadingIcon = {
 
-                    onClick = {
-
-                        expanded = false
-
-                        navController.navigate(
-                            "clients"
+                        Icon(
+                            Icons.Default.History,
+                            contentDescription = null
                         )
-                    }
-                )
-
-                DropdownMenuItem(
-
+                    },
                     text = {
                         Text("Historique")
                     },
@@ -176,33 +215,41 @@ fun SalePortraitScreen(
 
                 DropdownMenuItem(
 
+                    leadingIcon = {
+
+                        Icon(
+                            Icons.Default.Save,
+                            contentDescription = null
+                        )
+                    },
+
                     text = {
-                        Text("💾 Sauvegarder")
+                        Text("Sauvegarder")
                     },
 
                     onClick = {
-
                         expanded = false
-
-                        navController.navigate(
-                            "backup"
-                        )
+                        navController.navigate("backup")
                     }
                 )
 
                 DropdownMenuItem(
 
+                    leadingIcon = {
+
+                        Icon(
+                            Icons.Default.Restore,
+                            contentDescription = null
+                        )
+                    },
+
                     text = {
-                        Text("📂 Restaurer")
+                        Text("Restaurer")
                     },
 
                     onClick = {
-
                         expanded = false
-
-                        navController.navigate(
-                            "restore"
-                        )
+                        navController.navigate("restore")
                     }
                 )
             }
@@ -232,7 +279,7 @@ fun SalePortraitScreen(
                 ) {
 
                     Text(
-                        text = formatCfa(total)
+                        text = "Total = "+formatCfa(total)
                     )
 
 //                    Button(
@@ -517,13 +564,12 @@ fun ProductRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = 16.dp,
+                horizontal = 8.dp,
                 vertical = 4.dp
             ),
         onClick = {
 
             if (product.quantity > 0) {
-
                 onClick()
             }
         }
@@ -532,37 +578,77 @@ fun ProductRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement =
-                Arrangement.SpaceBetween
+                .padding(12.dp),
+
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Column {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(
+                        randomProductColor(product.id)
+                    )
+            )
+
+            Spacer(
+                modifier = Modifier.width(12.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
 
                 Text(
                     text = product.name,
-                    style = MaterialTheme.typography.titleMedium
+                    style =
+                        MaterialTheme.typography.titleMedium
                 )
 
                 Text(
-                    text = "Stock : ${product.quantity}",
-                    color =
-                        if (product.quantity == 0)
-                            MaterialTheme.colorScheme.error
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "Stock : ${product.quantity}"
                 )
+
+                if (product.quantity == 0) {
+
+                    Text(
+                        text = "🚫 RUPTURE",
+                        color =
+                            MaterialTheme.colorScheme.error
+                    )
+                }
             }
 
             Text(
-                formatCfa(
-                    product.price
-                )
+                text = formatCfa(product.price),
+                modifier = Modifier.width(100.dp),
+                textAlign = TextAlign.End,
+                style = MaterialTheme.typography.titleMedium
             )
         }
     }
 }
 
+fun randomProductColor(
+    id: Int
+): Color {
+
+    val colors = listOf(
+
+        Color(0xFFE91E63),
+        Color(0xFF2196F3),
+        Color(0xFF4CAF50),
+        Color(0xFFFF9800),
+        Color(0xFF9C27B0),
+        Color(0xFFF44336),
+        Color(0xFF009688)
+    )
+
+    return colors[
+        id % colors.size
+    ]
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(

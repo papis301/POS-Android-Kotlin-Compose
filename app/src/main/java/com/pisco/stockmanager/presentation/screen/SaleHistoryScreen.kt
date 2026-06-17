@@ -27,19 +27,7 @@ fun SaleHistoryScreen(
 ) {
 
     val sales by viewModel.sales.collectAsState()
-    val context = LocalContext.current
-    val activity = context as Activity
-    DisposableEffect(Unit) {
 
-        activity.requestedOrientation =
-            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-
-        onDispose {
-
-            activity.requestedOrientation =
-                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        }
-    }
 
     Column(
         modifier = Modifier
