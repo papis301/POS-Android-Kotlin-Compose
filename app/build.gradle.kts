@@ -73,4 +73,5 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.56")
     implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("com.google.code.gson:gson:2.13.1")
 }

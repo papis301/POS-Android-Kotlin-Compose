@@ -23,4 +23,15 @@ class SaleRepository @Inject constructor(
     ) {
         saleDao.delete(sale)
     }
+
+    suspend fun getSalesOnce():
+            List<SaleEntity> {
+
+        return saleDao
+            .getAllSalesOnce()
+    }
+    suspend fun deleteAll() {
+
+        saleDao.deleteAll()
+    }
 }

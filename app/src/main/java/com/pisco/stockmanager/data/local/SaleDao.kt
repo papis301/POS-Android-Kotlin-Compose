@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SaleDao {
 
-    @Insert
+    @Insert(
+        onConflict = OnConflictStrategy.REPLACE
+    )
     suspend fun insert(
         sale: SaleEntity
     ): Long
@@ -20,4 +22,10 @@ interface SaleDao {
     @Query("SELECT * FROM sales")
     fun getAllSales():
             Flow<List<SaleEntity>>
+
+    @Query("SELECT * FROM sales")
+    suspend fun getAllSalesOnce():
+            List<SaleEntity>
+    @Query("DELETE FROM sales")
+    suspend fun deleteAll()
 }

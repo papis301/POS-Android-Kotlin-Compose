@@ -7,8 +7,12 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ProductDao {
 
-    @Insert
-    suspend fun insert(product: ProductEntity)
+    @Insert(
+        onConflict = OnConflictStrategy.REPLACE
+    )
+    suspend fun insert(
+        product: ProductEntity
+    )
 
     @Update
     suspend fun update(product: ProductEntity)
@@ -33,5 +37,10 @@ interface ProductDao {
         id: Int
     ): ProductEntity?
 
+    @Query("SELECT * FROM products")
+    suspend fun getAllProductsOnce():
+            List<ProductEntity>
 
+    @Query("DELETE FROM products")
+    suspend fun deleteAll()
 }

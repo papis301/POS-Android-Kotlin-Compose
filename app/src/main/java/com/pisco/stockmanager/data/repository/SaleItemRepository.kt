@@ -17,4 +17,15 @@ class SaleItemRepository @Inject constructor(
     fun getItemsBySale(
         saleId: Int
     ) = saleItemDao.getItemsBySale(saleId)
+
+    suspend fun getSaleItemsOnce():
+            List<SaleItemEntity> {
+
+        return saleItemDao
+            .getAllSaleItemsOnce()
+    }
+    suspend fun deleteAll() {
+
+        saleItemDao.deleteAll()
+    }
 }

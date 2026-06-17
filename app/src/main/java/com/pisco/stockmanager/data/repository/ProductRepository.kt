@@ -41,4 +41,16 @@ class ProductRepository @Inject constructor(
     suspend fun getProductById(
         id: Int
     ) = productDao.getById(id)
+
+    suspend fun getProductsOnce():
+            List<ProductEntity> {
+
+        return productDao
+            .getAllProductsOnce()
+    }
+
+    suspend fun deleteAll() {
+
+        productDao.deleteAll()
+    }
 }

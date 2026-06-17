@@ -173,6 +173,38 @@ fun SalePortraitScreen(
                         )
                     }
                 )
+
+                DropdownMenuItem(
+
+                    text = {
+                        Text("💾 Sauvegarder")
+                    },
+
+                    onClick = {
+
+                        expanded = false
+
+                        navController.navigate(
+                            "backup"
+                        )
+                    }
+                )
+
+                DropdownMenuItem(
+
+                    text = {
+                        Text("📂 Restaurer")
+                    },
+
+                    onClick = {
+
+                        expanded = false
+
+                        navController.navigate(
+                            "restore"
+                        )
+                    }
+                )
             }
         }
 

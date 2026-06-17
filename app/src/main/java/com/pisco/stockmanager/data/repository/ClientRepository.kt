@@ -34,4 +34,15 @@ class ClientRepository @Inject constructor(
 
     fun getClientCount() =
         clientDao.getClientCount()
+
+    suspend fun getClientsOnce():
+            List<ClientEntity> {
+
+        return clientDao
+            .getAllClientsOnce()
+    }
+    suspend fun deleteAll() {
+
+        clientDao.deleteAll()
+    }
 }

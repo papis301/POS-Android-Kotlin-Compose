@@ -7,10 +7,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.pisco.stockmanager.presentation.screen.BackupScreen
 import com.pisco.stockmanager.presentation.screen.CartScreen
 import com.pisco.stockmanager.presentation.screen.ClientScreen
 import com.pisco.stockmanager.presentation.screen.DashboardScreen
 import com.pisco.stockmanager.presentation.screen.ProductScreen
+import com.pisco.stockmanager.presentation.screen.RestoreScreen
 import com.pisco.stockmanager.presentation.screen.SaleDetailScreen
 import com.pisco.stockmanager.presentation.screen.SaleHistoryScreen
 import com.pisco.stockmanager.presentation.screen.SaleScreen
@@ -63,6 +65,14 @@ fun AppNavGraph(
             CartScreen(
                 navController = navController
             )
+        }
+
+        composable("backup") {
+            BackupScreen()
+        }
+
+        composable("restore") {
+            RestoreScreen()
         }
 
         composable(
