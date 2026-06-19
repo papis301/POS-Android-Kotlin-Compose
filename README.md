@@ -53,7 +53,7 @@ StockManager est une application Android de gestion de stock et de caisse (POS) 
 Cloner le projet :
 
 ```bash
-git clone https://github.com/VOTRE_USERNAME/StockManager.git
+git clone https://github.com/papis301/StockManager.git
 ```
 
 Ouvrir avec Android Studio :
