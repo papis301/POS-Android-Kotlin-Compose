@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Delete
@@ -34,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.pisco.stockmanager.data.local.ProductEntity
 import com.pisco.stockmanager.presentation.viewmodel.SaleViewModel
+import com.pisco.stockmanager.ui.theme.BluePrimary
 import com.pisco.stockmanager.utils.formatCfa
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,12 +73,17 @@ fun SalePortraitScreen(
 
     Scaffold(
 
+        containerColor = BluePrimary,
+
         topBar = {
 
             TopAppBar(
 
                 title = {
-                    Text("Caisse")
+                    Text(
+                        text = "Caisse",
+                        color = Color.White
+                    )
                 },
 
                 navigationIcon = {
@@ -89,7 +96,8 @@ fun SalePortraitScreen(
 
                         Icon(
                             imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu"
+                            contentDescription = "Menu",
+                            tint = Color.White
                         )
                     }
                 },
@@ -98,17 +106,25 @@ fun SalePortraitScreen(
 
                     IconButton(
                         onClick = {
-                           // navController.navigate("cart")
+                            // navController.navigate("cart")
                             showCart = true
                         }
                     ) {
 
                         Icon(
                             imageVector = Icons.Filled.ShoppingCart,
-                            contentDescription = "Panier"
+                            contentDescription = "Panier",
+                            tint = Color.White
                         )
                     }
-                }
+                },
+
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = BluePrimary,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                )
             )
 
             DropdownMenu(
@@ -120,29 +136,6 @@ fun SalePortraitScreen(
                 }
 
             ) {
-
-//                DropdownMenuItem(
-//
-//                    leadingIcon = {
-//
-//                        Icon(
-//                            Icons.Default.Dashboard,
-//                            contentDescription = null
-//                        )
-//                    },
-//                    text = {
-//                        Text("Dashboard")
-//                    },
-//
-//                    onClick = {
-//
-//                        expanded = false
-//
-//                        navController.navigate(
-//                            "dashboard"
-//                        )
-//                    }
-//                )
 
                 DropdownMenuItem(
 
@@ -166,29 +159,6 @@ fun SalePortraitScreen(
                         )
                     }
                 )
-
-//                DropdownMenuItem(
-//
-//                    leadingIcon = {
-//
-//                        Icon(
-//                            Icons.Default.People,
-//                            contentDescription = null
-//                        )
-//                    },
-//                    text = {
-//                        Text("Clients")
-//                    },
-//
-//                    onClick = {
-//
-//                        expanded = false
-//
-//                        navController.navigate(
-//                            "clients"
-//                        )
-//                    }
-//                )
 
                 DropdownMenuItem(
 
@@ -260,6 +230,13 @@ fun SalePortraitScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(
+                        topStart = 24.dp,
+                        topEnd = 24.dp
+                    )
+                )
         ) {
 
 
@@ -281,16 +258,6 @@ fun SalePortraitScreen(
                     Text(
                         text = "Total = "+formatCfa(total)
                     )
-
-//                    Button(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        onClick = {
-//
-//                        }
-//                    ) {
-//
-//                        Text("PAYER")
-//                    }
                 }
             }
 
@@ -453,13 +420,13 @@ fun SalePortraitScreen(
                         )
 
                         Button(
-                                modifier = Modifier.fillMaxWidth(),
-                                enabled = cart.isNotEmpty(),
-                                onClick = {
-                                    viewModel.validateSale(
-                                        clientId = 0
-                                    )
-                                    showCart = false
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = cart.isNotEmpty(),
+                            onClick = {
+                                viewModel.validateSale(
+                                    clientId = 0
+                                )
+                                showCart = false
                             }
                         ) {
 
@@ -664,12 +631,24 @@ fun CartScreen(
 
     Scaffold(
 
+        containerColor = BluePrimary,
+
         topBar = {
 
             TopAppBar(
                 title = {
-                    Text("Panier")
-                }
+                    Text(
+                        text = "Panier",
+                        color = Color.White
+                    )
+                },
+
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = BluePrimary,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                )
             )
         }
 
@@ -679,6 +658,13 @@ fun CartScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(
+                        topStart = 24.dp,
+                        topEnd = 24.dp
+                    )
+                )
         ) {
 
             LazyColumn(
@@ -716,5 +702,3 @@ fun CartScreen(
         }
     }
 }
-
-

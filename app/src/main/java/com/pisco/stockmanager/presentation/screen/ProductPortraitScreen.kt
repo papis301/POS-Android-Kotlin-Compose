@@ -2,9 +2,11 @@ package com.pisco.stockmanager.presentation.screen
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddBox
@@ -13,12 +15,16 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pisco.stockmanager.data.local.ProductEntity
 import com.pisco.stockmanager.presentation.viewmodel.ProductViewModel
+import com.pisco.stockmanager.ui.theme.BluePrimary
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductPortraitScreen(
     viewModel: ProductViewModel = hiltViewModel()
@@ -104,6 +110,29 @@ fun ProductPortraitScreen(
 
     Scaffold(
 
+        containerColor = BluePrimary,
+
+        topBar = {
+
+            TopAppBar(
+
+                title = {
+                    Text(
+                        text = "Produits",
+                        color = Color.White
+                    )
+                },
+
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = BluePrimary,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                )
+            )
+
+        },
+
         floatingActionButton = {
 
             FloatingActionButton(
@@ -125,13 +154,16 @@ fun ProductPortraitScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(
+                        topStart = 24.dp,
+                        topEnd = 24.dp
+                    )
+                )
         ) {
 
             // ton contenu ici
-
-
-
-
 
     Column(
         modifier = Modifier.padding(16.dp)
@@ -337,136 +369,242 @@ fun ProductPortraitScreen(
         )
     }
 
-    if (showAddDialog) {
+            if (showAddDialog) {
 
-        AlertDialog(
-
-            onDismissRequest = {
-                showAddDialog = false
-            },
-
-            title = {
-                Text("Nouveau Produit")
-            },
-
-            text = {
-
-                Column {
-
-                    OutlinedTextField(
-                        value = productName,
-                        onValueChange = {
-                            productName = it
-                        },
-                        label = {
-                            Text("Nom produit")
-                        }
-                    )
-
-                    OutlinedTextField(
-                        value = salePrice,
-                        onValueChange = {
-                            salePrice =
-                                it.filter { c ->
-                                    c.isDigit()
-                                }
-                        },
-                        label = {
-                            Text("Prix de vente")
-                        }
-                    )
-
-                    OutlinedTextField(
-                        value = purchasePrice,
-                        onValueChange = {
-                            purchasePrice =
-                                it.filter { c ->
-                                    c.isDigit()
-                                }
-                        },
-                        label = {
-                            Text("Prix d'achat")
-                        }
-                    )
-
-                    OutlinedTextField(
-                        value = stock,
-                        onValueChange = {
-                            stock =
-                                it.filter { c ->
-                                    c.isDigit()
-                                }
-                        },
-                        label = {
-                            Text("Stock initial")
-                        }
-                    )
-
-                    OutlinedTextField(
-                        value = category,
-                        onValueChange = {
-                            category = it
-                        },
-                        label = {
-                            Text("Catégorie")
-                        }
-                    )
-
-                    OutlinedTextField(
-                        value = description,
-                        onValueChange = {
-                            description = it
-                        },
-                        label = {
-                            Text("Description")
-                        }
-                    )
+                var nameError by remember {
+                    mutableStateOf(false)
                 }
-            },
 
-            confirmButton = {
+                var priceError by remember {
+                    mutableStateOf(false)
+                }
 
-                Button(
+                var stockError by remember {
+                    mutableStateOf(false)
+                }
 
-                    onClick = {
+                AlertDialog(
 
-                        viewModel.addProduct(
-
-                            name = productName,
-
-                            description = description,
-
-                            purchasePrice =
-                                purchasePrice.toDoubleOrNull()
-                                    ?: 0.0,
-
-                            price =
-                                salePrice.toDoubleOrNull()
-                                    ?: 0.0,
-
-                            quantity =
-                                stock.toIntOrNull()
-                                    ?: 0,
-
-                            category = category
-                        )
-
-                        productName = ""
-                        salePrice = ""
-                        purchasePrice = ""
-                        stock = ""
-                        category = ""
-                        description = ""
-
+                    onDismissRequest = {
                         showAddDialog = false
-                    }
-                ) {
+                    },
 
-                    Text("Enregistrer")
-                }
+                    title = {
+                        Text("Nouveau Produit")
+                    },
+
+                    text = {
+
+                        Column {
+
+                            OutlinedTextField(
+                                value = productName,
+                                onValueChange = {
+
+                                    productName = it
+
+                                    nameError = false
+                                },
+                                isError = nameError,
+                                label = {
+                                    Text("Nom produit *")
+                                }
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = salePrice,
+                                onValueChange = {
+
+                                    salePrice =
+                                        it.filter { c ->
+                                            c.isDigit()
+                                                    || c == '.'
+                                        }
+
+                                    priceError = false
+                                },
+                                isError = priceError,
+                                label = {
+                                    Text("Prix de vente *")
+                                }
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = purchasePrice,
+                                onValueChange = {
+
+                                    purchasePrice =
+                                        it.filter { c ->
+                                            c.isDigit()
+                                                    || c == '.'
+                                        }
+                                },
+                                label = {
+                                    Text("Prix d'achat")
+                                }
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = stock,
+
+                                onValueChange = {
+
+                                    stock =
+                                        it.filter {
+                                                c ->
+                                            c.isDigit()
+                                        }
+
+                                    stockError = false
+                                },
+
+                                isError = stockError,
+
+                                label = {
+                                    Text("Stock initial *")
+                                }
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = category,
+                                onValueChange = {
+                                    category = it
+                                },
+                                label = {
+                                    Text("Catégorie")
+                                }
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = {
+                                    description = it
+                                },
+                                label = {
+                                    Text("Description")
+                                }
+                            )
+
+                            if (nameError) {
+
+                                Text(
+                                    text = "Le nom est obligatoire",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+
+                            if (priceError) {
+
+                                Text(
+                                    text = "Prix invalide",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+
+                            if (stockError) {
+
+                                Text(
+                                    text =
+                                        "Le stock initial doit être supérieur à 0",
+
+                                    color =
+                                        MaterialTheme
+                                            .colorScheme
+                                            .error
+                                )
+                            }
+                        }
+                    },
+
+                    confirmButton = {
+
+                        Button(
+
+                            onClick = {
+
+                                nameError =
+                                    productName.isBlank()
+
+                                priceError =
+                                    salePrice.toDoubleOrNull() == null
+                                            ||
+                                            salePrice.toDouble() <= 0
+
+                                stockError =
+                                    stock.toIntOrNull() == null
+                                            ||
+                                            stock.toInt() <= 0
+
+                                if (
+                                    !nameError &&
+                                    !priceError  &&
+                                    !stockError
+                                ) {
+
+                                    viewModel.addProduct(
+
+                                        name =
+                                            productName.trim(),
+
+                                        description =
+                                            description.trim(),
+
+                                        purchasePrice =
+                                            purchasePrice
+                                                .toDoubleOrNull()
+                                                ?: 0.0,
+
+                                        price =
+                                            salePrice
+                                                .toDouble(),
+
+                                        quantity =
+                                            stock
+                                                .toIntOrNull()
+                                                ?: 0,
+
+                                        category =
+                                            category.trim()
+                                    )
+
+                                    productName = ""
+                                    salePrice = ""
+                                    purchasePrice = ""
+                                    stock = ""
+                                    category = ""
+                                    description = ""
+
+                                    showAddDialog = false
+                                }
+                            }
+
+                        ) {
+
+                            Text("Ajouter")
+                        }
+                    }
+                )
             }
-        )
-    }
 }
     }
 

@@ -18,7 +18,7 @@ fun SaleDetailScreen(
     saleId: Int,
     items: List<SaleItemEntity>
 ) {
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
