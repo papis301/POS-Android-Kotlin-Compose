@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -112,6 +113,24 @@ fun ProductPortraitScreen(
         mutableStateOf("")
     }
 
+    var search by remember {
+        mutableStateOf("")
+    }
+
+    val filteredProducts =
+        products.filter {
+
+            it.name.contains(
+                search,
+                ignoreCase = true
+            ) ||
+
+                    it.category.contains(
+                        search,
+                        ignoreCase = true
+                    )
+        }
+
     Scaffold(
 
         containerColor = BluePrimary,
@@ -157,7 +176,10 @@ fun ProductPortraitScreen(
             FloatingActionButton(
                 onClick = {
                     showAddDialog = true
-                }
+                },
+
+                containerColor = BluePrimary,
+                contentColor = Color.White
             ) {
 
                 Icon(
@@ -187,11 +209,41 @@ fun ProductPortraitScreen(
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
+        OutlinedTextField(
 
+            value = search,
+
+            onValueChange = {
+                search = it
+            },
+
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
+
+            placeholder = {
+                Text("Rechercher")
+            },
+
+            leadingIcon = {
+
+                Icon(
+                    Icons.Default.Search,
+                    null
+                )
+            },
+
+            singleLine = true
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(12.dp)
+        )
 
         LazyColumn {
 
-            items(products) { product ->
+            items(filteredProducts) { product ->
 
                 Card(
                     modifier = Modifier
