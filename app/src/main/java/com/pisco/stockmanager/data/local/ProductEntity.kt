@@ -22,5 +22,7 @@ data class ProductEntity(
     val category: String = "",
 
     val createdAt: Long =
-        System.currentTimeMillis()
+        System.currentTimeMillis(),
+
+    val active: Boolean = true
 )

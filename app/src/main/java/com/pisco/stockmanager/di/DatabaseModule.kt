@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.pisco.stockmanager.data.local.AppDatabase
 import com.pisco.stockmanager.data.local.ClientDao
+import com.pisco.stockmanager.data.local.MIGRATION_6_7
 import com.pisco.stockmanager.data.local.ProductDao
 import com.pisco.stockmanager.data.local.SaleDao
 import com.pisco.stockmanager.data.local.SaleItemDao
@@ -28,7 +29,9 @@ object DatabaseModule {
             AppDatabase::class.java,
             "stock_manager_db"
         )
-            .fallbackToDestructiveMigration()
+            .addMigrations(
+                MIGRATION_6_7
+            )
             .build()
     }
 

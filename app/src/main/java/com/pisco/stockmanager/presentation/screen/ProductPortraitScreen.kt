@@ -8,8 +8,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddBox
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -20,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.pisco.stockmanager.data.local.ProductEntity
 import com.pisco.stockmanager.presentation.viewmodel.ProductViewModel
 import com.pisco.stockmanager.ui.theme.BluePrimary
@@ -27,6 +30,7 @@ import com.pisco.stockmanager.ui.theme.BluePrimary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductPortraitScreen(
+    navController: NavController,
     viewModel: ProductViewModel = hiltViewModel()
 ) {
 
@@ -121,6 +125,21 @@ fun ProductPortraitScreen(
                         text = "Produits",
                         color = Color.White
                     )
+                },
+                navigationIcon = {
+
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        }
+                    ) {
+
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Retour",
+                            tint = Color.White
+                        )
+                    }
                 },
 
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -288,14 +307,15 @@ fun ProductPortraitScreen(
 
                             OutlinedButton(
                                 onClick = {
-                                    viewModel.deleteProduct(
-                                        product
-                                    )
+                                    viewModel
+                                        .deactivateProduct(
+                                            product
+                                        )
                                 }
                             ) {
 
                                 Icon(
-                                    imageVector = Icons.Default.Delete,
+                                    imageVector = Icons.Default.Block,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.error
                                 )

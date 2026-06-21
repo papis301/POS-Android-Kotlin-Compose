@@ -32,6 +32,15 @@ class ProductRepository @Inject constructor(
         productDao.delete(product)
     }
 
+    suspend fun deactivateProduct(
+        product: ProductEntity
+    ) {
+
+        productDao.deactivateProduct(
+            product.id
+        )
+    }
+
     fun getProductCount() =
         productDao.getProductCount()
 

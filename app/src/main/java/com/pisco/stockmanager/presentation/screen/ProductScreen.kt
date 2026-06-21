@@ -5,15 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.pisco.stockmanager.presentation.viewmodel.ProductViewModel
 import com.pisco.stockmanager.presentation.viewmodel.SaleViewModel
 
 @Composable
-fun ProductScreen()
+fun ProductScreen(
+    navController: NavController,
+    viewModel: ProductViewModel = hiltViewModel()
+)
 {
-
-
     val configuration =
         LocalConfiguration.current
 
@@ -28,7 +30,8 @@ fun ProductScreen()
     } else {
 
         ProductPortraitScreen(
-
+            navController = navController,
+            viewModel = viewModel
         )
     }
 }

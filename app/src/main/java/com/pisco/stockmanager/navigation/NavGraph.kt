@@ -38,6 +38,7 @@ fun AppNavGraph(
             Screen.Products.route
         ) {
             ProductScreen(
+                navController
             )
         }
 

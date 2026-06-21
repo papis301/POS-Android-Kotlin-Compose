@@ -2,6 +2,8 @@ package com.pisco.stockmanager.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [
@@ -10,7 +12,7 @@ import androidx.room.RoomDatabase
         SaleEntity::class,
         SaleItemEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -21,3 +23,25 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun saleItemDao(): SaleItemDao
 }
+
+val MIGRATION_6_7 =
+    object : Migration(
+        6,
+        7
+    ) {
+
+        override fun migrate(
+            db:
+            SupportSQLiteDatabase
+        ) {
+
+            db.execSQL(
+                """
+            ALTER TABLE products
+            ADD COLUMN active
+            INTEGER NOT NULL
+            DEFAULT 1
+            """
+            )
+        }
+    }

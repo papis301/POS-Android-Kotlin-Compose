@@ -2,81 +2,140 @@ package com.pisco.stockmanager.presentation.screen
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.pisco.stockmanager.data.local.SaleItemEntity
+import com.pisco.stockmanager.presentation.viewmodel.SaleViewModel
+import com.pisco.stockmanager.ui.theme.BluePrimary
 import com.pisco.stockmanager.utils.formatCfa
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SaleDetailScreen(
     saleId: Int,
-    items: List<SaleItemEntity>
+    items: List<SaleItemEntity>,
+    navController: NavController? = null
 ) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Scaffold(
 
-        Text(
-            text = "Facture #$saleId",
-            style =
-                MaterialTheme.typography.headlineSmall
-        )
+        containerColor = BluePrimary,
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+        topBar = {
 
-        LazyColumn(
-            modifier = Modifier.weight(1f)
-        ) {
+            TopAppBar(
 
-            items(items) { item ->
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement =
-                        Arrangement.SpaceBetween
-                ) {
-
+                title = {
                     Text(
-                        "${item.productName} x${item.quantity}"
+                        text = "Facture #$saleId",
+                        color = Color.White
                     )
+                },
 
-                    Text(
-                        formatCfa(
-                            item.quantity *
-                                    item.unitPrice
-                        ) + " CFA"
-                    )
-                }
+                navigationIcon = {
 
-                HorizontalDivider()
-            }
+                    if (navController != null) {
+
+                        IconButton(
+                            onClick = {
+                                navController.popBackStack()
+                            }
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Retour",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                },
+
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = BluePrimary,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                )
+            )
         }
 
-        Text(
-            text =
-                "Total : ${
-                    formatCfa(
-                        items.sumOf {
-                            it.quantity *
-                                    it.unitPrice
-                        }
+    ) { padding ->
+
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(
+                        topStart = 24.dp,
+                        topEnd = 24.dp
                     )
-                } CFA",
-            style =
-                MaterialTheme.typography.titleLarge
-        )
+                )
+                .padding(16.dp)
+        ) {
+
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+
+                    items(items) { item ->
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement =
+                                Arrangement.SpaceBetween
+                        ) {
+
+                            Text(
+                                "${item.productName} x${item.quantity}", color = BluePrimary
+                            )
+
+                            Text(
+                                formatCfa(
+                                    item.quantity *
+                                            item.unitPrice
+                                ) + " CFA", color = BluePrimary
+                            )
+                        }
+
+                        HorizontalDivider()
+                    }
+                }
+
+                Text(
+                    text =
+                        "Total : ${
+                            formatCfa(
+                                items.sumOf {
+                                    it.quantity *
+                                            it.unitPrice
+                                }
+                            )
+                        } CFA",
+                    style =
+                        MaterialTheme.typography.titleLarge,
+                    color = BluePrimary
+                )
+            }
+        }
     }
 }

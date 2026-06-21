@@ -108,4 +108,12 @@ class ProductViewModel @Inject constructor(
             )
         }
     }
+    fun deactivateProduct(
+        product: ProductEntity
+    ) {
+
+        viewModelScope.launch {
+            productRepository.deactivateProduct(product)
+        }
+    }
 }
