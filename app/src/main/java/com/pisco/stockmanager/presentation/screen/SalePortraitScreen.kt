@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -137,6 +138,29 @@ fun SalePortraitScreen(
 
             ) {
 
+//                DropdownMenuItem(
+//
+//                    leadingIcon = {
+//
+//                        Icon(
+//                            Icons.Default.Dashboard,
+//                            contentDescription = null
+//                        )
+//                    },
+//                    text = {
+//                        Text("Dashboard")
+//                    },
+//
+//                    onClick = {
+//
+//                        expanded = false
+//
+//                        navController.navigate(
+//                            "dashboard"
+//                        )
+//                    }
+//                )
+
                 DropdownMenuItem(
 
                     leadingIcon = {
@@ -159,6 +183,29 @@ fun SalePortraitScreen(
                         )
                     }
                 )
+
+//                DropdownMenuItem(
+//
+//                    leadingIcon = {
+//
+//                        Icon(
+//                            Icons.Default.People,
+//                            contentDescription = null
+//                        )
+//                    },
+//                    text = {
+//                        Text("Clients")
+//                    },
+//
+//                    onClick = {
+//
+//                        expanded = false
+//
+//                        navController.navigate(
+//                            "clients"
+//                        )
+//                    }
+//                )
 
                 DropdownMenuItem(
 
@@ -222,6 +269,26 @@ fun SalePortraitScreen(
                         navController.navigate("restore")
                     }
                 )
+
+                DropdownMenuItem(
+
+                    leadingIcon = {
+
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = null
+                        )
+                    },
+
+                    text = {
+                        Text("Paramètres")
+                    },
+
+                    onClick = {
+                        expanded = false
+                        navController.navigate("settings")
+                    }
+                )
             }
         }
 
@@ -231,7 +298,7 @@ fun SalePortraitScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .background(
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(
                         topStart = 24.dp,
                         topEnd = 24.dp
@@ -258,6 +325,16 @@ fun SalePortraitScreen(
                     Text(
                         text = "Total = "+formatCfa(total)
                     )
+
+//                    Button(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        onClick = {
+//
+//                        }
+//                    ) {
+//
+//                        Text("PAYER")
+//                    }
                 }
             }
 
@@ -659,7 +736,7 @@ fun CartScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .background(
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(
                         topStart = 24.dp,
                         topEnd = 24.dp

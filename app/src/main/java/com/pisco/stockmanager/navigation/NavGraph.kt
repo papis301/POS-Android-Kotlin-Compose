@@ -10,12 +10,14 @@ import androidx.navigation.compose.composable
 import com.pisco.stockmanager.presentation.screen.BackupScreen
 import com.pisco.stockmanager.presentation.screen.CartScreen
 import com.pisco.stockmanager.presentation.screen.ClientScreen
+import com.pisco.stockmanager.presentation.screen.ContactScreen
 import com.pisco.stockmanager.presentation.screen.DashboardScreen
 import com.pisco.stockmanager.presentation.screen.ProductScreen
 import com.pisco.stockmanager.presentation.screen.RestoreScreen
 import com.pisco.stockmanager.presentation.screen.SaleDetailScreen
 import com.pisco.stockmanager.presentation.screen.SaleHistoryScreen
 import com.pisco.stockmanager.presentation.screen.SaleScreen
+import com.pisco.stockmanager.presentation.screen.SettingsScreen
 import com.pisco.stockmanager.presentation.viewmodel.SaleItemViewModel
 
 @Composable
@@ -74,6 +76,14 @@ fun AppNavGraph(
 
         composable("restore") {
             RestoreScreen()
+        }
+
+        composable("settings") {
+            SettingsScreen(navController = navController)
+        }
+
+        composable("contact") {
+            ContactScreen(navController = navController)
         }
 
         composable(

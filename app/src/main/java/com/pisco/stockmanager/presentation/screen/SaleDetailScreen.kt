@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -28,6 +29,11 @@ fun SaleDetailScreen(
     items: List<SaleItemEntity>,
     navController: NavController? = null
 ) {
+
+    val total =
+        items.sumOf {
+            it.quantity * it.unitPrice
+        }
 
     Scaffold(
 
@@ -63,6 +69,28 @@ fun SaleDetailScreen(
                     }
                 },
 
+                actions = {
+
+                    if (navController != null) {
+
+                        IconButton(
+                            onClick = {
+
+                                navController.navigate(
+                                    "printer/$saleId"
+                                )
+                            }
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Default.Print,
+                                contentDescription = "Imprimer",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                },
+
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = BluePrimary,
                     titleContentColor = Color.White,
@@ -79,7 +107,7 @@ fun SaleDetailScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .background(
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(
                         topStart = 24.dp,
                         topEnd = 24.dp
@@ -88,54 +116,47 @@ fun SaleDetailScreen(
                 .padding(16.dp)
         ) {
 
-            Column(
-                modifier = Modifier.padding(16.dp)
+            LazyColumn(
+                modifier = Modifier.weight(1f)
             ) {
-                LazyColumn(
-                    modifier = Modifier.weight(1f)
-                ) {
 
-                    items(items) { item ->
+                items(items) { item ->
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement =
-                                Arrangement.SpaceBetween
-                        ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement =
+                            Arrangement.SpaceBetween
+                    ) {
 
-                            Text(
-                                "${item.productName} x${item.quantity}", color = BluePrimary
-                            )
+                        Text(
+                            text = "${item.productName} x${item.quantity}",
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
 
-                            Text(
-                                formatCfa(
-                                    item.quantity *
-                                            item.unitPrice
-                                ) + " CFA", color = BluePrimary
-                            )
-                        }
-
-                        HorizontalDivider()
+                        Text(
+                            text = formatCfa(
+                                item.quantity *
+                                        item.unitPrice
+                            ) + " CFA",
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
-                }
 
-                Text(
-                    text =
-                        "Total : ${
-                            formatCfa(
-                                items.sumOf {
-                                    it.quantity *
-                                            it.unitPrice
-                                }
-                            )
-                        } CFA",
-                    style =
-                        MaterialTheme.typography.titleLarge,
-                    color = BluePrimary
-                )
+                    HorizontalDivider()
+                }
             }
+
+            Text(
+                text =
+                    "Total : ${
+                        formatCfa(total)
+                    } CFA",
+                color = MaterialTheme.colorScheme.onSurface,
+                style =
+                    MaterialTheme.typography.titleLarge
+            )
         }
     }
 }

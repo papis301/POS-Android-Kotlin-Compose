@@ -8,17 +8,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddBox
-import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -31,8 +27,8 @@ import com.pisco.stockmanager.ui.theme.BluePrimary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductPortraitScreen(
-    navController: NavController,
-    viewModel: ProductViewModel = hiltViewModel()
+    viewModel: ProductViewModel = hiltViewModel(),
+    navController: NavController
 ) {
 
     val products by viewModel.products.collectAsState()
@@ -113,24 +109,6 @@ fun ProductPortraitScreen(
         mutableStateOf("")
     }
 
-    var search by remember {
-        mutableStateOf("")
-    }
-
-    val filteredProducts =
-        products.filter {
-
-            it.name.contains(
-                search,
-                ignoreCase = true
-            ) ||
-
-                    it.category.contains(
-                        search,
-                        ignoreCase = true
-                    )
-        }
-
     Scaffold(
 
         containerColor = BluePrimary,
@@ -145,21 +123,6 @@ fun ProductPortraitScreen(
                         color = Color.White
                     )
                 },
-                navigationIcon = {
-
-                    IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                        }
-                    ) {
-
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Retour",
-                            tint = Color.White
-                        )
-                    }
-                },
 
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = BluePrimary,
@@ -168,18 +131,19 @@ fun ProductPortraitScreen(
                     actionIconContentColor = Color.White
                 )
             )
-
         },
 
         floatingActionButton = {
 
             FloatingActionButton(
+
                 onClick = {
                     showAddDialog = true
                 },
 
                 containerColor = BluePrimary,
                 contentColor = Color.White
+
             ) {
 
                 Icon(
@@ -196,7 +160,7 @@ fun ProductPortraitScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .background(
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(
                         topStart = 24.dp,
                         topEnd = 24.dp
@@ -206,240 +170,209 @@ fun ProductPortraitScreen(
 
             // ton contenu ici
 
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
-        OutlinedTextField(
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
 
-            value = search,
 
-            onValueChange = {
-                search = it
-            },
+                LazyColumn {
 
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
+                    items(products) { product ->
 
-            placeholder = {
-                Text("Rechercher")
-            },
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
 
-            leadingIcon = {
-
-                Icon(
-                    Icons.Default.Search,
-                    null
-                )
-            },
-
-            singleLine = true
-        )
-
-        Spacer(
-            modifier =
-                Modifier.height(12.dp)
-        )
-
-        LazyColumn {
-
-            items(filteredProducts) { product ->
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-
-                    Column(
-                        modifier = Modifier.padding(12.dp)
-                    ) {
-
-                        Text(
-                            product.name,
-                            style =
-                                MaterialTheme.typography.titleMedium
-                        )
-
-                        Text(
-                            "Prix : ${product.price} CFA"
-                        )
-
-                        Text(
-                            "Stock : ${product.quantity}"
-                        )
-
-                        when {
-
-                            product.quantity == 0 -> {
+                            Column(
+                                modifier = Modifier.padding(12.dp)
+                            ) {
 
                                 Text(
-                                    "🚫 Rupture",
-                                    color =
-                                        MaterialTheme.colorScheme.error
+                                    product.name,
+                                    style =
+                                        MaterialTheme.typography.titleMedium
                                 )
-                            }
-
-                            product.quantity < 5 -> {
 
                                 Text(
-                                    "⚠ Stock faible",
-                                    color =
-                                        androidx.compose.ui.graphics.Color(
-                                            0xFFFF9800
+                                    "Prix : ${product.price} CFA"
+                                )
+
+                                Text(
+                                    "Stock : ${product.quantity}"
+                                )
+
+                                when {
+
+                                    product.quantity == 0 -> {
+
+                                        Text(
+                                            "🚫 Rupture",
+                                            color =
+                                                MaterialTheme.colorScheme.error
                                         )
-                                )
-                            }
-                        }
+                                    }
 
-                        Spacer(
-                            modifier = Modifier.height(8.dp)
-                        )
+                                    product.quantity < 5 -> {
 
-                        Row {
-
-                            OutlinedButton(
-                                onClick = {
-
-                                    selectedProduct =
-                                        product
-
-                                    showRestockDialog =
-                                        true
-                                }
-                            ) {
-
-                                Icon(
-                                    imageVector = Icons.Default.AddBox,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-
-                            Spacer(
-                                modifier = Modifier.width(8.dp)
-                            )
-
-                            OutlinedButton(
-                                onClick = {
-
-                                    selectedProduct = product
-
-                                    editName = product.name
-
-                                    editDescription =
-                                        product.description
-
-                                    editPurchasePrice =
-                                        product.purchasePrice.toString()
-
-                                    editSalePrice =
-                                        product.price.toString()
-
-                                    editStock =
-                                        product.quantity.toString()
-
-                                    editCategory =
-                                        product.category
-
-                                    showEditDialog = true
-                                }
-                            ) {
-
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary
-                                )
-                            }
-
-                            Spacer(
-                                modifier = Modifier.width(8.dp)
-                            )
-
-                            OutlinedButton(
-                                onClick = {
-                                    viewModel
-                                        .deactivateProduct(
-                                            product
+                                        Text(
+                                            "⚠ Stock faible",
+                                            color =
+                                                androidx.compose.ui.graphics.Color(
+                                                    0xFFFF9800
+                                                )
                                         )
+                                    }
                                 }
-                            ) {
 
-                                Icon(
-                                    imageVector = Icons.Default.Block,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
+                                Spacer(
+                                    modifier = Modifier.height(8.dp)
                                 )
+
+                                Row {
+
+                                    OutlinedButton(
+                                        onClick = {
+
+                                            selectedProduct =
+                                                product
+
+                                            showRestockDialog =
+                                                true
+                                        }
+                                    ) {
+
+                                        Icon(
+                                            imageVector = Icons.Default.AddBox,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+
+                                    Spacer(
+                                        modifier = Modifier.width(8.dp)
+                                    )
+
+                                    OutlinedButton(
+                                        onClick = {
+
+                                            selectedProduct = product
+
+                                            editName = product.name
+
+                                            editDescription =
+                                                product.description
+
+                                            editPurchasePrice =
+                                                product.purchasePrice.toString()
+
+                                            editSalePrice =
+                                                product.price.toString()
+
+                                            editStock =
+                                                product.quantity.toString()
+
+                                            editCategory =
+                                                product.category
+
+                                            showEditDialog = true
+                                        }
+                                    ) {
+
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+
+                                    Spacer(
+                                        modifier = Modifier.width(8.dp)
+                                    )
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            viewModel.deleteProduct(
+                                                product
+                                            )
+                                        }
+                                    ) {
+
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-    }
 
-    if (showRestockDialog) {
+            if (showRestockDialog) {
 
-        AlertDialog(
+                AlertDialog(
 
-            onDismissRequest = {
-                showRestockDialog = false
-            },
-
-            title = {
-                Text("Réapprovisionnement")
-            },
-
-            text = {
-
-                Column {
-
-                    Text(
-                        selectedProduct?.name ?: ""
-                    )
-
-                    OutlinedTextField(
-                        value = restockQty,
-                        onValueChange = {
-                            restockQty = it.filter {
-                                    c -> c.isDigit()
-                            }
-                        },
-                        label = {
-                            Text("Quantité")
-                        }
-                    )
-                }
-            },
-
-            confirmButton = {
-
-                Button(
-                    onClick = {
-
-                        val qty =
-                            restockQty.toIntOrNull() ?: 0
-
-                        selectedProduct?.let {
-
-                            viewModel.restockProduct(
-                                it,
-                                qty
-                            )
-                        }
-
-                        restockQty = ""
-
+                    onDismissRequest = {
                         showRestockDialog = false
-                    }
-                ) {
+                    },
 
-                    Text("Valider")
-                }
+                    title = {
+                        Text("Réapprovisionnement")
+                    },
+
+                    text = {
+
+                        Column {
+
+                            Text(
+                                selectedProduct?.name ?: ""
+                            )
+
+                            OutlinedTextField(
+                                value = restockQty,
+                                onValueChange = {
+                                    restockQty = it.filter {
+                                            c -> c.isDigit()
+                                    }
+                                },
+                                label = {
+                                    Text("Quantité")
+                                }
+                            )
+                        }
+                    },
+
+                    confirmButton = {
+
+                        Button(
+                            onClick = {
+
+                                val qty =
+                                    restockQty.toIntOrNull() ?: 0
+
+                                selectedProduct?.let {
+
+                                    viewModel.restockProduct(
+                                        it,
+                                        qty
+                                    )
+                                }
+
+                                restockQty = ""
+
+                                showRestockDialog = false
+                            }
+                        ) {
+
+                            Text("Valider")
+                        }
+                    }
+                )
             }
-        )
-    }
 
             if (showAddDialog) {
 
@@ -502,25 +435,6 @@ fun ProductPortraitScreen(
                                 isError = priceError,
                                 label = {
                                     Text("Prix de vente *")
-                                }
-                            )
-
-                            Spacer(
-                                modifier = Modifier.height(8.dp)
-                            )
-
-                            OutlinedTextField(
-                                value = purchasePrice,
-                                onValueChange = {
-
-                                    purchasePrice =
-                                        it.filter { c ->
-                                            c.isDigit()
-                                                    || c == '.'
-                                        }
-                                },
-                                label = {
-                                    Text("Prix d'achat")
                                 }
                             )
 
@@ -677,7 +591,7 @@ fun ProductPortraitScreen(
                     }
                 )
             }
-}
+        }
     }
 
     if (showEditDialog) {
@@ -713,19 +627,6 @@ fun ProductPortraitScreen(
                         },
                         label = {
                             Text("Description")
-                        }
-                    )
-
-                    OutlinedTextField(
-                        value = editPurchasePrice,
-                        onValueChange = {
-                            editPurchasePrice =
-                                it.filter { c ->
-                                    c.isDigit()
-                                }
-                        },
-                        label = {
-                            Text("Prix d'achat")
                         }
                     )
 
