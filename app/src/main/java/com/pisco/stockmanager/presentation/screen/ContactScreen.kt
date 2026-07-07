@@ -70,7 +70,7 @@ private object SupportContact {
     const val WEBSITE_LABEL = ""
 
     // ID ou nom d'utilisateur de la page (visible dans l'URL : facebook.com/<ID>)
-    const val FACEBOOK_PAGE_ID = "stockmanagerapp"
+    const val FACEBOOK_PAGE_ID = "61591494425042"
 
     const val FACEBOOK_URL = "https://facebook.com/$FACEBOOK_PAGE_ID"
 
@@ -195,31 +195,31 @@ fun ContactScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            ContactActionCard(
-                icon = Icons.Filled.Email,
-                iconBackground = Color(0xFFEA4335),
-                title = "Email",
-                subtitle = SupportContact.EMAIL,
-                onClick = {
-                    sendEmail(context, SupportContact.EMAIL)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            ContactActionCard(
-                icon = Icons.Filled.Language,
-                iconBackground = Color(0xFF6C63FF),
-                title = "Site web",
-                subtitle = SupportContact.WEBSITE_LABEL,
-                onClick = {
-                    openWebsite(context, SupportContact.WEBSITE)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
+//            Spacer(modifier = Modifier.height(12.dp))
+//
+//            ContactActionCard(
+//                icon = Icons.Filled.Email,
+//                iconBackground = Color(0xFFEA4335),
+//                title = "Email",
+//                subtitle = SupportContact.EMAIL,
+//                onClick = {
+//                    sendEmail(context, SupportContact.EMAIL)
+//                }
+//            )
+//
+//            Spacer(modifier = Modifier.height(12.dp))
+//
+//            ContactActionCard(
+//                icon = Icons.Filled.Language,
+//                iconBackground = Color(0xFF6C63FF),
+//                title = "Site web",
+//                subtitle = SupportContact.WEBSITE_LABEL,
+//                onClick = {
+//                    openWebsite(context, SupportContact.WEBSITE)
+//                }
+//            )
+//
+//            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

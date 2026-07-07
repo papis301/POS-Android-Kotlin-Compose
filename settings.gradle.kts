@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "StockManager"
 include(":app")
- 
+include(":shared")
+include(":desktop")
