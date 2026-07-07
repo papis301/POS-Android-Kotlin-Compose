@@ -33,6 +33,10 @@ fun ProductPortraitScreen(
 
     val products by viewModel.products.collectAsState()
 
+    var search by remember {
+        mutableStateOf("")
+    }
+
     var name by remember {
         mutableStateOf("")
     }
@@ -174,10 +178,34 @@ fun ProductPortraitScreen(
                 modifier = Modifier.padding(16.dp)
             ) {
 
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = {
+                        search = it
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    label = {
+                        Text("Rechercher un produit")
+                    }
+                )
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
 
                 LazyColumn {
 
-                    items(products) { product ->
+                    items(
+                        products.filter {
+
+                            it.name.contains(
+                                search,
+                                true
+                            )
+                        }
+                    ) { product ->
 
                         Card(
                             modifier = Modifier

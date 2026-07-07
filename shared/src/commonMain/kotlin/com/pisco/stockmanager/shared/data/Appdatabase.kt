@@ -4,13 +4,22 @@ import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
+import androidx.room.migration.Migration
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
 import kotlinx.coroutines.Dispatchers
 
-@Database(entities = [ProductEntity::class], version = 1, exportSchema = true)
+@Database(
+    entities = [ProductEntity::class, SaleEntity::class, SaleItemEntity::class],
+    version = 2,
+    exportSchema = true
+)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
+    abstract fun saleDao(): SaleDao
+    abstract fun saleItemDao(): SaleItemDao
 }
 
 /**
@@ -31,11 +40,46 @@ expect class DatabaseFactory {
     fun create(): RoomDatabase.Builder<AppDatabase>
 }
 
-const val DATABASE_NAME = "stock_manager.db"
+const val DATABASE_NAME = "yombena.db"
+
+/**
+ * Version 1 -> 2 : ajout des tables Ventes (sales, sale_items).
+ * Ne touche PAS à la table "products" existante — les produits déjà
+ * enregistrés (Android comme Desktop) sont conservés intacts.
+ */
+val MIGRATION_1_2 = object : Migration(startVersion = 1, endVersion = 2) {
+
+    override fun migrate(connection: SQLiteConnection) {
+
+        connection.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `sales` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `clientId` INTEGER NOT NULL,
+                `total` REAL NOT NULL,
+                `createdAt` INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+
+        connection.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `sale_items` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `saleId` INTEGER NOT NULL,
+                `productId` INTEGER NOT NULL,
+                `productName` TEXT NOT NULL,
+                `quantity` INTEGER NOT NULL,
+                `unitPrice` REAL NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
 
 fun buildDatabase(factory: DatabaseFactory): AppDatabase {
     return factory.create()
-        .fallbackToDestructiveMigration(dropAllTables = true)
+        .addMigrations(MIGRATION_1_2)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.Default)
         .build()

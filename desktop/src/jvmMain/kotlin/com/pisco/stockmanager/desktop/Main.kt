@@ -1,6 +1,7 @@
 package com.pisco.stockmanager.desktop
 
-import androidx.compose.ui.input.key.Key.Companion.Window
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.pisco.stockmanager.shared.di.desktopPlatformModule
@@ -18,7 +19,11 @@ fun main() {
             onCloseRequest = ::exitApplication,
             title = "Yombena — Back-office"
         ) {
-            YombenaDesktopApp()
+            MaterialTheme(
+                colorScheme = lightColorScheme(primary = GreenPrimary)
+            ) {
+                YombenaApp()
+            }
         }
     }
 }

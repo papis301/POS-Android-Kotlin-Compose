@@ -31,16 +31,28 @@ public class AppDatabase_Impl : AppDatabase() {
     ProductDao_Impl(this)
   }
 
+  private val _saleDao: Lazy<SaleDao> = lazy {
+    SaleDao_Impl(this)
+  }
+
+  private val _saleItemDao: Lazy<SaleItemDao> = lazy {
+    SaleItemDao_Impl(this)
+  }
+
   protected override fun createOpenDelegate(): RoomOpenDelegate {
-    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(1, "204668bc775a42a57df1bf614d6cc76c", "1d3dabcc84a9e4c20ba4836b74c9cee2") {
+    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(2, "f6b5c4f8467dba564bb0d73b829e7a3c", "06add175da903cf06b469bd930cb27ed") {
       public override fun createAllTables(connection: SQLiteConnection) {
         connection.execSQL("CREATE TABLE IF NOT EXISTS `products` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `purchasePrice` REAL NOT NULL, `price` REAL NOT NULL, `quantity` INTEGER NOT NULL, `category` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `active` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `sales` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientId` INTEGER NOT NULL, `total` REAL NOT NULL, `createdAt` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `sale_items` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `saleId` INTEGER NOT NULL, `productId` INTEGER NOT NULL, `productName` TEXT NOT NULL, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
-        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '204668bc775a42a57df1bf614d6cc76c')")
+        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f6b5c4f8467dba564bb0d73b829e7a3c')")
       }
 
       public override fun dropAllTables(connection: SQLiteConnection) {
         connection.execSQL("DROP TABLE IF EXISTS `products`")
+        connection.execSQL("DROP TABLE IF EXISTS `sales`")
+        connection.execSQL("DROP TABLE IF EXISTS `sale_items`")
       }
 
       public override fun onCreate(connection: SQLiteConnection) {
@@ -81,6 +93,44 @@ public class AppDatabase_Impl : AppDatabase() {
               | Found:
               |""".trimMargin() + _existingProducts)
         }
+        val _columnsSales: MutableMap<String, TableInfo.Column> = mutableMapOf()
+        _columnsSales.put("id", TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsSales.put("clientId", TableInfo.Column("clientId", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsSales.put("total", TableInfo.Column("total", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsSales.put("createdAt", TableInfo.Column("createdAt", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        val _foreignKeysSales: MutableSet<TableInfo.ForeignKey> = mutableSetOf()
+        val _indicesSales: MutableSet<TableInfo.Index> = mutableSetOf()
+        val _infoSales: TableInfo = TableInfo("sales", _columnsSales, _foreignKeysSales, _indicesSales)
+        val _existingSales: TableInfo = read(connection, "sales")
+        if (!_infoSales.equals(_existingSales)) {
+          return RoomOpenDelegate.ValidationResult(false, """
+              |sales(com.pisco.stockmanager.shared.data.SaleEntity).
+              | Expected:
+              |""".trimMargin() + _infoSales + """
+              |
+              | Found:
+              |""".trimMargin() + _existingSales)
+        }
+        val _columnsSaleItems: MutableMap<String, TableInfo.Column> = mutableMapOf()
+        _columnsSaleItems.put("id", TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsSaleItems.put("saleId", TableInfo.Column("saleId", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsSaleItems.put("productId", TableInfo.Column("productId", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsSaleItems.put("productName", TableInfo.Column("productName", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsSaleItems.put("quantity", TableInfo.Column("quantity", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsSaleItems.put("unitPrice", TableInfo.Column("unitPrice", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        val _foreignKeysSaleItems: MutableSet<TableInfo.ForeignKey> = mutableSetOf()
+        val _indicesSaleItems: MutableSet<TableInfo.Index> = mutableSetOf()
+        val _infoSaleItems: TableInfo = TableInfo("sale_items", _columnsSaleItems, _foreignKeysSaleItems, _indicesSaleItems)
+        val _existingSaleItems: TableInfo = read(connection, "sale_items")
+        if (!_infoSaleItems.equals(_existingSaleItems)) {
+          return RoomOpenDelegate.ValidationResult(false, """
+              |sale_items(com.pisco.stockmanager.shared.data.SaleItemEntity).
+              | Expected:
+              |""".trimMargin() + _infoSaleItems + """
+              |
+              | Found:
+              |""".trimMargin() + _existingSaleItems)
+        }
         return RoomOpenDelegate.ValidationResult(true, null)
       }
     }
@@ -90,12 +140,14 @@ public class AppDatabase_Impl : AppDatabase() {
   protected override fun createInvalidationTracker(): InvalidationTracker {
     val _shadowTablesMap: MutableMap<String, String> = mutableMapOf()
     val _viewTables: MutableMap<String, Set<String>> = mutableMapOf()
-    return InvalidationTracker(this, _shadowTablesMap, _viewTables, "products")
+    return InvalidationTracker(this, _shadowTablesMap, _viewTables, "products", "sales", "sale_items")
   }
 
   protected override fun getRequiredTypeConverterClasses(): Map<KClass<*>, List<KClass<*>>> {
     val _typeConvertersMap: MutableMap<KClass<*>, List<KClass<*>>> = mutableMapOf()
     _typeConvertersMap.put(ProductDao::class, ProductDao_Impl.getRequiredConverters())
+    _typeConvertersMap.put(SaleDao::class, SaleDao_Impl.getRequiredConverters())
+    _typeConvertersMap.put(SaleItemDao::class, SaleItemDao_Impl.getRequiredConverters())
     return _typeConvertersMap
   }
 
@@ -110,4 +162,8 @@ public class AppDatabase_Impl : AppDatabase() {
   }
 
   public override fun productDao(): ProductDao = _productDao.value
+
+  public override fun saleDao(): SaleDao = _saleDao.value
+
+  public override fun saleItemDao(): SaleItemDao = _saleItemDao.value
 }
