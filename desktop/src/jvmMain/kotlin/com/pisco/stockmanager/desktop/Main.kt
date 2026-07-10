@@ -1,9 +1,8 @@
 package com.pisco.stockmanager.desktop
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import com.pisco.stockmanager.desktop.di.appModule // 1. Import your desktop appModule
 import com.pisco.stockmanager.shared.di.desktopPlatformModule
 import com.pisco.stockmanager.shared.di.sharedModule
 import org.koin.core.context.startKoin
@@ -11,7 +10,8 @@ import org.koin.core.context.startKoin
 fun main() {
 
     startKoin {
-        modules(desktopPlatformModule, sharedModule)
+        // 2. Include appModule alongside your shared modules
+        modules(desktopPlatformModule, sharedModule, appModule)
     }
 
     application {
@@ -19,9 +19,7 @@ fun main() {
             onCloseRequest = ::exitApplication,
             title = "Yombena — Back-office"
         ) {
-            MaterialTheme(
-                colorScheme = lightColorScheme(primary = GreenPrimary)
-            ) {
+            YombenaTheme {
                 YombenaApp()
             }
         }

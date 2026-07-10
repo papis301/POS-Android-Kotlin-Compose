@@ -1,11 +1,14 @@
 package com.pisco.stockmanager.desktop
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.pisco.stockmanager.shared.data.ProductEntity
 import com.pisco.stockmanager.shared.domain.CartItem
@@ -88,6 +91,19 @@ fun CaisseScreen() {
     }
 
     Scaffold(
+
+        containerColor = GreenPrimary,
+
+        topBar = {
+            TopAppBar(
+                title = { Text("Caisse", color = Color.White) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GreenPrimary,
+                    titleContentColor = Color.White
+                )
+            )
+        },
+
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
 
@@ -95,12 +111,12 @@ fun CaisseScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                )
                 .padding(16.dp)
         ) {
-
-            Text("Caisse", style = MaterialTheme.typography.titleLarge)
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             Row(modifier = Modifier.weight(1f)) {
 

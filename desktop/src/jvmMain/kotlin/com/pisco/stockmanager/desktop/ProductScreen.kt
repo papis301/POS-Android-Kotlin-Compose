@@ -20,10 +20,7 @@ import com.pisco.stockmanager.shared.domain.ProductRepository
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-// Palette Yombena (même valeurs que app/.../ui/theme/Color.kt)
-val GreenPrimary = Color(0xFF1B824F)
-val StockLowOrange = Color(0xFFFF9800)
-private val BackgroundLight = Color(0xFFF5F7FA)
+// Palette et couleurs définies dans Theme.kt (GreenPrimary, StockLowOrange, etc.)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,7 +108,7 @@ fun ProductScreen() {
                 .padding(padding)
                 .fillMaxSize()
                 .background(
-                    color = BackgroundLight,
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                 )
                 .padding(16.dp)

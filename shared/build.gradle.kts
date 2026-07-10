@@ -1,6 +1,7 @@
 import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.lang.module.ModuleFinder.compose
 
 plugins {
     kotlin("multiplatform")
@@ -36,6 +37,9 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 // Le driver bundled (commonMain) suffit aussi pour Desktop.
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
             }
         }
     }
