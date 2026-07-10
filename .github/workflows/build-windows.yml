@@ -1,0 +1,64 @@
+name: Build Windows Desktop App
+
+# Déclenchement :
+# - à chaque push sur main touchant le code desktop/shared -> build de vérification (artifact seulement)
+# - à chaque tag "v*.*.*" (ex: v1.0.0) -> build + création d'une Release GitHub avec le zip attaché
+# - manuellement depuis l'onglet Actions de GitHub
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'shared/**'
+      - 'desktop/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
+      - '.github/workflows/build-windows.yml'
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # nécessaire pour publier une Release
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installer JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Configurer le cache Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build de l'app Windows (app image, sans installeur)
+        run: ./gradlew.bat :desktop:createDistributable --no-daemon
+
+      - name: Compresser l'app en .zip
+        shell: pwsh
+        run: |
+          $src = "desktop/build/compose/binaries/main/app/Yombena"
+          Compress-Archive -Path $src -DestinationPath "Yombena-Windows.zip"
+
+      # Toujours disponible dans l'onglet "Actions" -> "Artifacts", 90 jours par défaut
+      - name: Publier l'artifact de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Yombena-Windows
+          path: Yombena-Windows.zip
+          retention-days: 30
+
+      # Seulement si le push est un tag (ex: v1.0.0) -> crée une vraie Release téléchargeable
+      - name: Créer une Release GitHub
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Yombena-Windows.zip
+          generate_release_notes: true
