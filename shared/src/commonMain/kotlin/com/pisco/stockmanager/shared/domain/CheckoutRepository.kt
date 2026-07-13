@@ -2,6 +2,7 @@ package com.pisco.stockmanager.shared.domain
 
 import com.pisco.stockmanager.shared.data.SaleEntity
 import com.pisco.stockmanager.shared.data.SaleItemEntity
+import java.lang.System.currentTimeMillis
 
 sealed class CheckoutResult {
     data object Success : CheckoutResult()
@@ -45,7 +46,8 @@ class CheckoutRepository(
         val saleId = saleRepository.insertSale(
             SaleEntity(
                 clientId = clientId,
-                total = totalAmount
+                total = totalAmount,
+                createdAt = currentTimeMillis()
             )
         )
 
