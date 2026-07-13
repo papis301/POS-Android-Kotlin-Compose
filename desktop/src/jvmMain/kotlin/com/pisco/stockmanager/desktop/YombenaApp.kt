@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.TrendingUp // AJOUT : Import d'une icône pour les ventes (ou utilisez une autre icône de votre choix)
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -27,9 +28,12 @@ import java.awt.Toolkit
 private enum class AppSection {
     CAISSE,
     PRODUITS,
+    VENTES, // AJOUT
     SETTINGS
 }
+
 fun main() = application {
+    // ... Votre code main reste identique ...
     startKoin {
         modules(appModule)
     }
@@ -43,7 +47,6 @@ fun main() = application {
         undecorated = true,
         resizable = true
     ) {
-        // Force le plein écran APRÈS que la fenêtre native soit créée
         LaunchedEffect(Unit) {
             val screenSize = Toolkit.getDefaultToolkit().screenSize
             window.setBounds(0, 0, screenSize.width, screenSize.height)
@@ -57,38 +60,6 @@ fun main() = application {
         }
     }
 }
-
-
-//fun main() {
-//    // Initialiser Koin
-//    startKoin {
-//        modules(appModule)
-//    }
-//
-//    val window = ComposeWindow().apply {
-//        title = "Yombena - Back-office"
-//       // minimumSize = Dimension(2024, 768)
-//        isResizable = true
-//
-//        // Force la fenêtre à s'ouvrir maximisée (X et Y)
-//       // extendedState = JFrame.MAXIMIZED_BOTH
-//    }
-//
-//    // Utiliser la méthode setContent au lieu de compose
-//    window.setContent {
-//        KoinApplication(application = {
-//            modules(appModule)
-//        }) {
-//            YombenaTheme(darkTheme = false) {
-//                YombenaApp()
-//            }
-//        }
-//    }
-//
-//    window.isVisible = true
-//
-//    window.extendedState = JFrame.MAXIMIZED_BOTH
-//}
 
 @Composable
 fun YombenaApp() {
@@ -128,6 +99,20 @@ fun YombenaApp() {
                     )
                 )
 
+                // AJOUT : Bouton Ventes
+                NavigationBarItem(
+                    selected = section == AppSection.VENTES,
+                    onClick = { section = AppSection.VENTES },
+                    icon = { Icon(Icons.Default.TrendingUp, contentDescription = "Ventes") },
+                    label = { Text("Ventes") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+
                 NavigationBarItem(
                     selected = section == AppSection.SETTINGS,
                     onClick = { section = AppSection.SETTINGS },
@@ -151,6 +136,7 @@ fun YombenaApp() {
             when (section) {
                 AppSection.CAISSE -> CaisseScreen()
                 AppSection.PRODUITS -> ProductScreen()
+                AppSection.VENTES -> VentesScreen() // AJOUT : Assurez-vous d'avoir créé le composable VentesScreen()
                 AppSection.SETTINGS -> SettingsScreen(
                     onBack = { /* Pas de retour sur desktop */ }
                 )
@@ -158,3 +144,4 @@ fun YombenaApp() {
         }
     }
 }
+
