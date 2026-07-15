@@ -5,43 +5,34 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+// 1. AJOUTEZ CES DEUX IMPORTS pour Room KMP :
+import androidx.room.ConstructedBy
+import androidx.room.RoomDatabaseConstructor
+
 @Database(
     entities = [
         ProductEntity::class,
         ClientEntity::class,
         SaleEntity::class,
-        SaleItemEntity::class
+        SaleItemEntity::class,
+        ModuleLicenseEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
+// 2. AJOUTEZ l'annotation @ConstructedBy qui pointe vers le constructeur
+@ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao
     abstract fun clientDao(): ClientDao
     abstract fun saleDao(): SaleDao
-
     abstract fun saleItemDao(): SaleItemDao
+    abstract fun moduleLicenseDao(): ModuleLicenseDao
 }
 
-val MIGRATION_6_7 =
-    object : Migration(
-        6,
-        7
-    ) {
-
-        override fun migrate(
-            db:
-            SupportSQLiteDatabase
-        ) {
-
-            db.execSQL(
-                """
-            ALTER TABLE products
-            ADD COLUMN active
-            INTEGER NOT NULL
-            DEFAULT 1
-            """
-            )
-        }
-    }
+// 3. AJOUTEZ cet objet compagnon que Room va implémenter automatiquement :
+@Suppress("NO_ACTUAL_FOR_EXPECT")
+expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
+    override fun initialize(): AppDatabase
+}

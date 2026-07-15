@@ -2,6 +2,7 @@ package com.pisco.stockmanager.shared.di
 
 import com.pisco.stockmanager.shared.data.AppDatabase
 import com.pisco.stockmanager.shared.data.DatabaseFactory
+import com.pisco.stockmanager.shared.data.ModuleLicenseDao
 import com.pisco.stockmanager.shared.data.buildDatabase
 import com.pisco.stockmanager.shared.domain.CheckoutRepository
 import com.pisco.stockmanager.shared.domain.ProductRepository
@@ -49,4 +50,6 @@ val sharedModule: Module = module {
     single {
         CheckoutRepository(get(), get(), get())
     }
+
+    single<ModuleLicenseDao> { get<AppDatabase>().moduleLicenseDao() }
 }

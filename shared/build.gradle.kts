@@ -1,7 +1,6 @@
 import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.lang.module.ModuleFinder.compose
 
 plugins {
     kotlin("multiplatform")
@@ -28,6 +27,9 @@ kotlin {
             implementation("androidx.sqlite:sqlite-bundled:2.6.1")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             implementation("io.insert-koin:koin-core:4.0.0")
+            implementation("io.ktor:ktor-client-core:2.3.12")
+            implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
         }
 
         androidMain.dependencies {
@@ -36,10 +38,8 @@ kotlin {
 
         val desktopMain by getting {
             dependencies {
-                // Le driver bundled (commonMain) suffit aussi pour Desktop.
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-
             }
         }
     }
@@ -59,7 +59,9 @@ android {
     }
 }
 
+// CORRECTION ICI : Liaison de KSP avec le compilateur de Room multiplateforme
 dependencies {
+    add("kspCommonMainMetadata", "androidx.room:room-compiler:2.8.4")
     add("kspAndroid", "androidx.room:room-compiler:2.8.4")
     add("kspDesktop", "androidx.room:room-compiler:2.8.4")
 }

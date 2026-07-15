@@ -39,20 +39,26 @@ public class AppDatabase_Impl : AppDatabase() {
     SaleItemDao_Impl(this)
   }
 
+  private val _moduleLicenseDao: Lazy<ModuleLicenseDao> = lazy {
+    ModuleLicenseDao_Impl(this)
+  }
+
   protected override fun createOpenDelegate(): RoomOpenDelegate {
-    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(2, "f6b5c4f8467dba564bb0d73b829e7a3c", "06add175da903cf06b469bd930cb27ed") {
+    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(3, "dae86e0bdaa00d5fdf0f4495a1eae3b2", "bd8f72c3f9a83a4768fd1e5457dc015b") {
       public override fun createAllTables(connection: SQLiteConnection) {
         connection.execSQL("CREATE TABLE IF NOT EXISTS `products` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `purchasePrice` REAL NOT NULL, `price` REAL NOT NULL, `quantity` INTEGER NOT NULL, `category` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `active` INTEGER NOT NULL)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `sales` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clientId` INTEGER NOT NULL, `total` REAL NOT NULL, `createdAt` INTEGER NOT NULL)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `sale_items` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `saleId` INTEGER NOT NULL, `productId` INTEGER NOT NULL, `productName` TEXT NOT NULL, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `module_licenses` (`moduleId` TEXT NOT NULL, `isActivated` INTEGER NOT NULL, `activationDate` INTEGER NOT NULL, `expirationDate` INTEGER NOT NULL, `lastCheckedTimestamp` INTEGER NOT NULL, PRIMARY KEY(`moduleId`))")
         connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
-        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f6b5c4f8467dba564bb0d73b829e7a3c')")
+        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dae86e0bdaa00d5fdf0f4495a1eae3b2')")
       }
 
       public override fun dropAllTables(connection: SQLiteConnection) {
         connection.execSQL("DROP TABLE IF EXISTS `products`")
         connection.execSQL("DROP TABLE IF EXISTS `sales`")
         connection.execSQL("DROP TABLE IF EXISTS `sale_items`")
+        connection.execSQL("DROP TABLE IF EXISTS `module_licenses`")
       }
 
       public override fun onCreate(connection: SQLiteConnection) {
@@ -131,6 +137,25 @@ public class AppDatabase_Impl : AppDatabase() {
               | Found:
               |""".trimMargin() + _existingSaleItems)
         }
+        val _columnsModuleLicenses: MutableMap<String, TableInfo.Column> = mutableMapOf()
+        _columnsModuleLicenses.put("moduleId", TableInfo.Column("moduleId", "TEXT", true, 1, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsModuleLicenses.put("isActivated", TableInfo.Column("isActivated", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsModuleLicenses.put("activationDate", TableInfo.Column("activationDate", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsModuleLicenses.put("expirationDate", TableInfo.Column("expirationDate", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsModuleLicenses.put("lastCheckedTimestamp", TableInfo.Column("lastCheckedTimestamp", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        val _foreignKeysModuleLicenses: MutableSet<TableInfo.ForeignKey> = mutableSetOf()
+        val _indicesModuleLicenses: MutableSet<TableInfo.Index> = mutableSetOf()
+        val _infoModuleLicenses: TableInfo = TableInfo("module_licenses", _columnsModuleLicenses, _foreignKeysModuleLicenses, _indicesModuleLicenses)
+        val _existingModuleLicenses: TableInfo = read(connection, "module_licenses")
+        if (!_infoModuleLicenses.equals(_existingModuleLicenses)) {
+          return RoomOpenDelegate.ValidationResult(false, """
+              |module_licenses(com.pisco.stockmanager.shared.data.ModuleLicenseEntity).
+              | Expected:
+              |""".trimMargin() + _infoModuleLicenses + """
+              |
+              | Found:
+              |""".trimMargin() + _existingModuleLicenses)
+        }
         return RoomOpenDelegate.ValidationResult(true, null)
       }
     }
@@ -140,7 +165,7 @@ public class AppDatabase_Impl : AppDatabase() {
   protected override fun createInvalidationTracker(): InvalidationTracker {
     val _shadowTablesMap: MutableMap<String, String> = mutableMapOf()
     val _viewTables: MutableMap<String, Set<String>> = mutableMapOf()
-    return InvalidationTracker(this, _shadowTablesMap, _viewTables, "products", "sales", "sale_items")
+    return InvalidationTracker(this, _shadowTablesMap, _viewTables, "products", "sales", "sale_items", "module_licenses")
   }
 
   protected override fun getRequiredTypeConverterClasses(): Map<KClass<*>, List<KClass<*>>> {
@@ -148,6 +173,7 @@ public class AppDatabase_Impl : AppDatabase() {
     _typeConvertersMap.put(ProductDao::class, ProductDao_Impl.getRequiredConverters())
     _typeConvertersMap.put(SaleDao::class, SaleDao_Impl.getRequiredConverters())
     _typeConvertersMap.put(SaleItemDao::class, SaleItemDao_Impl.getRequiredConverters())
+    _typeConvertersMap.put(ModuleLicenseDao::class, ModuleLicenseDao_Impl.getRequiredConverters())
     return _typeConvertersMap
   }
 
@@ -166,4 +192,6 @@ public class AppDatabase_Impl : AppDatabase() {
   public override fun saleDao(): SaleDao = _saleDao.value
 
   public override fun saleItemDao(): SaleItemDao = _saleItemDao.value
+
+  public override fun moduleLicenseDao(): ModuleLicenseDao = _moduleLicenseDao.value
 }

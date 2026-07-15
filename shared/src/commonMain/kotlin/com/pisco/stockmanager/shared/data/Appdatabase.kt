@@ -11,8 +11,9 @@ import androidx.sqlite.execSQL
 import kotlinx.coroutines.Dispatchers
 
 @Database(
-    entities = [ProductEntity::class, SaleEntity::class, SaleItemEntity::class],
-    version = 2,
+    // AJOUT : ModuleLicenseEntity::class
+    entities = [ProductEntity::class, SaleEntity::class, SaleItemEntity::class, ModuleLicenseEntity::class],
+    version = 3, // Incrémenté de 2 à 3
     exportSchema = true
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -20,37 +21,40 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
     abstract fun saleDao(): SaleDao
     abstract fun saleItemDao(): SaleItemDao
+    abstract fun moduleLicenseDao(): ModuleLicenseDao // Nouveau DAO
 }
 
-/**
- * Room génère l'implémentation "actual" de cet objet à la compilation
- * (obligatoire depuis Kotlin 2.0 pour les bases de données KMP).
- * Ne rien mettre dedans, ne pas le supprimer.
- */
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
     override fun initialize(): AppDatabase
 }
 
-/**
- * Chaque plateforme fournit son propre Builder (chemin de fichier différent).
- * Voir DatabaseFactory.android.kt et DatabaseFactory.desktop.kt
- */
 expect class DatabaseFactory {
     fun create(): RoomDatabase.Builder<AppDatabase>
 }
 
 const val DATABASE_NAME = "yombena.db"
 
-/**
- * Version 1 -> 2 : ajout des tables Ventes (sales, sale_items).
- * Ne touche PAS à la table "products" existante — les produits déjà
- * enregistrés (Android comme Desktop) sont conservés intacts.
- */
-val MIGRATION_1_2 = object : Migration(startVersion = 1, endVersion = 2) {
-
+// Nouvelle migration V2 -> V3 pour Desktop
+val MIGRATION_2_3 = object : Migration(startVersion = 2, endVersion = 3) {
     override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `module_licenses` (
+                `moduleId` TEXT PRIMARY KEY NOT NULL,
+                `isActivated` INTEGER NOT NULL,
+                `activationDate` INTEGER NOT NULL,
+                `expirationDate` INTEGER NOT NULL,
+                `lastCheckedTimestamp` INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
 
+// Mise à jour de la liste des migrations d'origine de l'étape 1
+val MIGRATION_1_2 = object : Migration(startVersion = 1, endVersion = 2) {
+    override fun migrate(connection: SQLiteConnection) {
         connection.execSQL(
             """
             CREATE TABLE IF NOT EXISTS `sales` (
@@ -61,7 +65,6 @@ val MIGRATION_1_2 = object : Migration(startVersion = 1, endVersion = 2) {
             )
             """.trimIndent()
         )
-
         connection.execSQL(
             """
             CREATE TABLE IF NOT EXISTS `sale_items` (
@@ -79,7 +82,7 @@ val MIGRATION_1_2 = object : Migration(startVersion = 1, endVersion = 2) {
 
 fun buildDatabase(factory: DatabaseFactory): AppDatabase {
     return factory.create()
-        .addMigrations(MIGRATION_1_2)
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3) // AJOUT de MIGRATION_2_3
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.Default)
         .build()
