@@ -7,6 +7,7 @@ plugins {
     id("com.android.library")
     id("com.google.devtools.ksp")
     id("androidx.room")
+    kotlin("plugin.serialization") version "1.6.0"
 }
 
 kotlin {
@@ -34,12 +35,17 @@ kotlin {
 
         androidMain.dependencies {
             implementation("androidx.sqlite:sqlite-framework:2.6.1")
+            // 1. AJOUTEZ le moteur OkHttp pour Android
+            implementation("io.ktor:ktor-client-okhttp:2.3.12")
         }
 
         val desktopMain by getting {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+                // 2. AJOUTEZ le moteur Java (ou CIO) pour le Desktop
+                implementation("io.ktor:ktor-client-java:2.3.12")
             }
         }
     }

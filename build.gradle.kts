@@ -11,4 +11,6 @@ plugins {
     id("org.jetbrains.compose") version "1.7.3" apply false
     id("com.android.library") version "8.13.2" apply false
     id("androidx.room") version "2.8.4" apply false
+    kotlin("plugin.serialization") version "1.6.0"
+
 }

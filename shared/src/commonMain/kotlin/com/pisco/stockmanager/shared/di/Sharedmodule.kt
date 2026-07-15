@@ -4,6 +4,7 @@ import com.pisco.stockmanager.shared.data.AppDatabase
 import com.pisco.stockmanager.shared.data.DatabaseFactory
 import com.pisco.stockmanager.shared.data.ModuleLicenseDao
 import com.pisco.stockmanager.shared.data.buildDatabase
+import com.pisco.stockmanager.shared.data.network.FirebaseService
 import com.pisco.stockmanager.shared.domain.CheckoutRepository
 import com.pisco.stockmanager.shared.domain.ProductRepository
 import com.pisco.stockmanager.shared.domain.SaleItemRepository
@@ -19,6 +20,7 @@ import org.koin.dsl.module
  */
 val sharedModule: Module = module {
 
+    // --- Base de données & DAOs ---
     single<AppDatabase> {
         buildDatabase(get<DatabaseFactory>())
     }
@@ -35,6 +37,11 @@ val sharedModule: Module = module {
         get<AppDatabase>().saleItemDao()
     }
 
+    single<ModuleLicenseDao> {
+        get<AppDatabase>().moduleLicenseDao()
+    }
+
+    // --- Repositories ---
     single {
         ProductRepository(get())
     }
@@ -51,5 +58,8 @@ val sharedModule: Module = module {
         CheckoutRepository(get(), get(), get())
     }
 
-    single<ModuleLicenseDao> { get<AppDatabase>().moduleLicenseDao() }
+    // --- Firebase & Services Cloud ---
+    single {
+        FirebaseService() // ⬅️ AJOUT DE FIREBASE DANS KOIN
+    }
 }

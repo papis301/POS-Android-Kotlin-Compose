@@ -8,7 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,14 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.pisco.stockmanager.desktop.utils.formatDate
-import com.pisco.stockmanager.shared.data.FirebaseService
 import com.pisco.stockmanager.shared.data.ModuleLicenseEntity
 import com.pisco.stockmanager.shared.data.ModuleLicenseDao
+import com.pisco.stockmanager.shared.data.network.FirebaseService
 import com.pisco.stockmanager.shared.data.preferences.AppThemeMode
 import com.pisco.stockmanager.shared.data.preferences.Currency
 import com.pisco.stockmanager.shared.domain.SettingsRepository
 import com.pisco.stockmanager.shared.utils.getDeviceUUID
-import com.sun.org.apache.xalan.internal.lib.ExsltDatetime.formatDate
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -35,7 +34,7 @@ fun SettingsScreen(
 ) {
     val settingsRepository = koinInject<SettingsRepository>()
     val licenseDao = koinInject<ModuleLicenseDao>()
-    val firebaseService = koinInject<FirebaseService>() // Injecté via Koin
+    val firebaseService = koinInject<FirebaseService>()
     val scope = rememberCoroutineScope()
 
     var settings by remember { mutableStateOf(settingsRepository.getSettings()) }
@@ -49,14 +48,14 @@ fun SettingsScreen(
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // État d'abonnement / Firebase
+    // États liés à l'abonnement & synchronisation Cloud
     var isSubscribing by remember { mutableStateOf(false) }
     var subscriptionStatusMessage by remember { mutableStateOf<String?>(null) }
 
-    // Liste des licences lues en base de données locale
+    // Map locale contenant l'état des licences récupérées de Room
     var activeLicenses by remember { mutableStateOf<Map<String, ModuleLicenseEntity>>(emptyMap()) }
 
-    // Charger les licences de la base au démarrage
+    // Charger l'état initial des licences depuis Room SQLite
     LaunchedEffect(Unit) {
         activeLicenses = licenseDao.getAllLicenses().associateBy { it.moduleId }
     }
@@ -68,17 +67,16 @@ fun SettingsScreen(
         }
     }
 
-    // Fonction pour activer ou désactiver manuellement un module
+    // Fonction d'activation ou désactivation manuelle locale (mise en attente pour le moment)
+    /*
     fun toggleModuleActivation(moduleId: String, moduleName: String) {
         scope.launch {
             val existing = activeLicenses[moduleId]
             if (existing != null && existing.isActivated) {
-                // Désactivation
                 val updated = existing.copy(isActivated = false)
                 licenseDao.insertOrUpdate(updated)
-                snackbarMessage = "Module désactivé"
+                snackbarMessage = "Module désactivé en local"
             } else {
-                // Activation pour une période de 30 jours
                 val now = System.currentTimeMillis()
                 val thirtyDaysInMs = 30L * 24 * 60 * 60 * 1000
                 val newLicense = ModuleLicenseEntity(
@@ -89,12 +87,12 @@ fun SettingsScreen(
                     lastCheckedTimestamp = now
                 )
                 licenseDao.insertOrUpdate(newLicense)
-                snackbarMessage = "Module activé pour 30 jours !"
+                snackbarMessage = "Module activé localement (30j) !"
             }
-            // Rafraîchir l'UI
             activeLicenses = licenseDao.getAllLicenses().associateBy { it.moduleId }
         }
     }
+    */
 
     fun updateTheme(themeMode: AppThemeMode) {
         settingsRepository.setThemeMode(themeMode)
@@ -124,7 +122,7 @@ fun SettingsScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.primary // Utilise le vert du thème de l'application
+        containerColor = MaterialTheme.colorScheme.primary
     ) { padding ->
 
         Column(
@@ -132,7 +130,7 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // En-tête avec fond dynamique vert
+            // En-tête
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -164,7 +162,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Contenu avec fond arrondi blanc/sombre adaptatif
+            // Contenu principal (avec fond de surface adaptatif)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -179,14 +177,14 @@ fun SettingsScreen(
                     .padding(16.dp)
             ) {
 
-                // ================= SECTION : ENREGISTREMENT APPAREIL (ABONNEMENT) =================
+                // ================= SECTION : SYNCHRONISATION CLOUD (Paiement) =================
                 Text(
                     text = "Abonnement Cloud",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = "Enregistrez cet appareil sur nos serveurs pour activer automatiquement vos licences achetées.",
+                    text = "Enregistrez cet appareil et synchronisez vos licences d'utilisation après paiement.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -203,15 +201,29 @@ fun SettingsScreen(
                         Button(
                             onClick = {
                                 isSubscribing = true
+                                subscriptionStatusMessage = null
                                 scope.launch {
-                                    val deviceId = getDeviceUUID(null) // Récupération de l'UUID natif (Desktop/Android)
-                                    val success = firebaseService.registerDeviceToFirebase(deviceId)
-                                    isSubscribing = false
-                                    subscriptionStatusMessage = if (success) {
-                                        "Appareil enregistré avec succès ! UUID : $deviceId"
+                                    val deviceId = getDeviceUUID(null)
+
+                                    // 1. Enregistre l'UUID sur Firebase si absent
+                                    val regSuccess = firebaseService.registerDeviceToFirebase(deviceId)
+
+                                    if (regSuccess) {
+                                        // 2. Synchronise les licences payées depuis Firebase vers Room local
+                                        val syncSuccess = firebaseService.syncLicensesFromFirebase(deviceId, licenseDao)
+
+                                        subscriptionStatusMessage = if (syncSuccess) {
+                                            "Licences mises à jour avec succès depuis le serveur Cloud !"
+                                        } else {
+                                            "Appareil connecté au serveur. (Aucun module activé sur Firebase pour cet UUID : $deviceId)"
+                                        }
+
+                                        // Rafraîchir l'affichage local de l'UI
+                                        activeLicenses = licenseDao.getAllLicenses().associateBy { it.moduleId }
                                     } else {
-                                        "Erreur lors de l'enregistrement. Vérifiez votre connexion."
+                                        subscriptionStatusMessage = "Erreur de communication avec le Cloud. Vérifiez votre connexion internet."
                                     }
+                                    isSubscribing = false
                                 }
                             },
                             enabled = !isSubscribing,
@@ -227,9 +239,9 @@ fun SettingsScreen(
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Icon(Icons.Default.CloudUpload, contentDescription = null)
+                                Icon(Icons.Default.CloudSync, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("S'abonner avec cet appareil")
+                                Text("S'abonner & Synchroniser les licences")
                             }
                         }
 
@@ -238,7 +250,7 @@ fun SettingsScreen(
                             Text(
                                 text = message,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -248,21 +260,22 @@ fun SettingsScreen(
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // ================= SECTION : GESTION DES MODULES PAYANTS =================
+                // ================= SECTION MASQUÉE : LISTE DES MODULES (ON Y REVIENDRA PLUS TARD) =================
+                /*
                 Text(
                     text = "Modules & Licences Professionnelles",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = "Activez ou gérez l'état de vos extensions payantes.",
+                    text = "Activez ou gérez l'état de vos extensions.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Liste complète avec le module DATE_FILTER inclus !
+                // Liste complète incluant le filtrage de dates
                 val modulesList = listOf(
                     "DATE_FILTER" to "Filtrage des ventes par date (Aujourd'hui, Semaine, Mois, Période)",
                     "SEARCH_PRO" to "Recherche produit avancée (Code-barres, Catégories)",
@@ -285,6 +298,7 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(24.dp))
+                */
 
                 // Informations du magasin
                 Text(
@@ -458,7 +472,8 @@ fun SettingsScreen(
     }
 }
 
-// ================= COMPOSABLE : Ligne de licence par module (Theme Friendly) =================
+// ================= COMPOSABLE : Élément d'affichage d'une licence (mis en attente pour le moment) =================
+/*
 @Composable
 fun ModuleLicenseItem(
     moduleName: String,
@@ -485,7 +500,7 @@ fun ModuleLicenseItem(
                 Text(
                     text = moduleName,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface // S'adapte au mode clair ou sombre
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -494,13 +509,13 @@ fun ModuleLicenseItem(
                     Text(
                         text = "Expire le : ${formatDate(expirationDate)}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary // Vert primaire pour l'activation
+                        color = MaterialTheme.colorScheme.primary
                     )
                 } else {
                     Text(
                         text = "Désactivé / Expiré",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error // Rouge très lisible
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }
@@ -513,7 +528,7 @@ fun ModuleLicenseItem(
                     containerColor = if (isActive) {
                         MaterialTheme.colorScheme.error
                     } else {
-                        MaterialTheme.colorScheme.primary // Bouton vert d'activation
+                        MaterialTheme.colorScheme.primary
                     }
                 )
             ) {
@@ -538,6 +553,7 @@ fun ModuleLicenseItem(
         }
     }
 }
+*/
 
 @Composable
 private fun ThemeOptionDesktop(
